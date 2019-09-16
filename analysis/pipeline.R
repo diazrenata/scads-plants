@@ -14,7 +14,7 @@ years <- c(1994, 2000)
 datasets_plan <- drake_plan(
 dat =target(get_plant_sad(year, season, treatment),
             transform = cross(year = !!years,
-                            season = c("summer", "winter"),
+                            season = c("summer"),
                             treatment = "control"),
             trigger = trigger(command = FALSE)),
 all_dat = target(MATSS::collect_analyses(list(dat)), transform = combine(dat))
@@ -30,7 +30,7 @@ for(i in 1:(nrow(datasets_plan) -1)) {
 sample_plan <- drake_plan(
   master_p_table = target(build_p_table(all_dat)),
   fs = target(sample_fs_long(dat, nsamples, p_table),
-              transform = map(dat = !!dat_targets, nsamples = 100, p_table = master_p_table)
+              transform = map(dat = !!dat_targets, nsamples = 10000, p_table = master_p_table)
   ),
   fs_list = target(MATSS::collect_analyses(list(fs)), transform = combine(fs)),
   fs_df = dplyr::bind_rows(fs_list)
@@ -45,7 +45,7 @@ skew_plan <- drake_plan(
 
 # run
 
-all <- dplyr::bind_rows(datasets_plan)# , sample_plan, skew_plan)
+all <- dplyr::bind_rows(datasets_plan, sample_plan, skew_plan)
 
 ## Set up the cache and config
 db <- DBI::dbConnect(RSQLite::SQLite(), here::here("analysis", "drake", "drake-cache.sqlite"))
@@ -58,6 +58,8 @@ if (interactive())
   sankey_drake_graph(config, build_times = "none")  # requires "networkD3" package
   vis_drake_graph(config, build_times = "none")     # requires "visNetwork" package
 }
+
+set.seed(1977)
 
 ## Run the pipeline
 nodename <- Sys.info()["nodename"]

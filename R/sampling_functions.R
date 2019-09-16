@@ -47,6 +47,7 @@ sample_fs_long <- function(dataset, nsamples, p_table = NULL) {
   p_table <- p_table[1:max_s, 1:(max_n + 1)]
 
   fs_samples <- feasiblesads::sample_fs(s = max_s, n = max_n, nsamples = nsamples, p_table = p_table) %>%
+    unique() %>%
     t() %>%
     as.data.frame() %>%
     tidyr::gather(key = "sim", value = "abund") %>%
