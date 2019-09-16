@@ -6,9 +6,9 @@ library(scadsplants)
 #expose_imports(scads)
 expose_imports(scadsplants)
 
-#years <- 1990:2005
+years <- 1990:2005
 
-years <- c(1994, 2000)
+#years <- c(1994, 2000)
 
 # get data
 datasets_plan <- drake_plan(
