@@ -23,7 +23,8 @@ Imports:
 Suggests:
     testthat
 Remotes: 
-    diazrenata/scads
-    diazrenata/feasiblesads
+    diazrenata/scads,
+    diazrenata/feasiblesads,
+    weecology/MATSS
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 6.1.1
