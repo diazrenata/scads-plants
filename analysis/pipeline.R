@@ -6,11 +6,13 @@ library(scadsplants)
 #expose_imports(scads)
 expose_imports(scadsplants)
 
+years <- 1990:2005
+
 # get data
 datasets_plan <- drake_plan(
 dat =target(get_plant_sad(year, season, treatment),
-            transform = cross(year = c(1994, 2000),
-                            season = c("summer"),
+            transform = cross(year = !!years,
+                            season = c("summer", "winter"),
                             treatment = "control"),
             trigger = trigger(command = FALSE)),
 all_dat = target(MATSS::collect_analyses(list(dat)), transform = combine(dat))
@@ -41,7 +43,7 @@ skew_plan <- drake_plan(
 
 # run
 
-all <- dplyr::bind_rows(datasets_plan, sample_plan, skew_plan)
+all <- dplyr::bind_rows(datasets_plan)# , sample_plan, skew_plan)
 
 ## Set up the cache and config
 db <- DBI::dbConnect(RSQLite::SQLite(), here::here("analysis", "drake", "drake-cache.sqlite"))
