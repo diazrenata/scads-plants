@@ -30,7 +30,7 @@ for(i in 1:(nrow(datasets_plan) -1)) {
 sample_plan <- drake_plan(
   master_p_table = target(build_p_table(all_dat)),
   fs = target(sample_fs_long(dat, nsamples, p_table),
-              transform = map(dat = !!dat_targets, nsamples = 100, p_table = master_p_table)
+              transform = map(dat = !!dat_targets, nsamples = 10000, p_table = master_p_table)
   ),
   skew = target(add_skew(fs),
                 transform = map(fs)),
