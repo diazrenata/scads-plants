@@ -30,22 +30,22 @@ for(i in 1:(nrow(datasets_plan) -1)) {
 sample_plan <- drake_plan(
   master_p_table = target(build_p_table(all_dat)),
   fs = target(sample_fs_long(dat, nsamples, p_table),
-              transform = map(dat = !!dat_targets, nsamples = 10000, p_table = master_p_table)
+              transform = map(dat = !!dat_targets, nsamples = 100, p_table = master_p_table)
   ),
+  skew = target(add_skew(fs),
+                transform = map(fs)),
   fs_list = target(MATSS::collect_analyses(list(fs)), transform = combine(fs)),
-  fs_df = dplyr::bind_rows(fs_list)
-)
-
-skew_plan <- drake_plan(
-  skew_summary_df = add_skew(fs_df),
-  skew_long_df = dplyr::left_join(fs_df, skew_summary_df, by = c("sim", "year", "season", "treatment", "source"))
+  fs_df = target(dplyr::bind_rows(fs_list)),
+  skew_list = target(MATSS::collect_analyses(list(skew)), transform = combine(skew)),
+  skew_df = target(dplyr::bind_rows(skew_list)),
+  skew_long_df = target(dplyr::left_join(fs_df, skew_df, by = c("sim", "year", "season", "treatment", "source")))
 )
 
 # reports
 
 # run
 
-all <- dplyr::bind_rows(datasets_plan, sample_plan, skew_plan)
+all <- dplyr::bind_rows(datasets_plan, sample_plan)
 
 ## Set up the cache and config
 db <- DBI::dbConnect(RSQLite::SQLite(), here::here("analysis", "drake", "drake-cache.sqlite"))
