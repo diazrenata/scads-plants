@@ -1,12 +1,12 @@
 Package: scadsplants
-Title: What the Package Does (One Line, Title Case)
+Title: Constraints on SADs of Portal Plants
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "First",
-           family = "Last",
+    person(given = "Renata",
+           family = "Diaz",
            role = c("aut", "cre"),
-           email = "first.last@example.com")
-Description: What the package does (one paragraph)
+           email = "diaz.renatam@gmail.com")
+Description: Analysis of Portal plant community species abundance distributions as compared to their feasible set. This is a development sandbox for a method to apply to large datasets.
 License: MIT + file LICENSE
 ByteCompile: true
 Encoding: UTF-8
@@ -14,10 +14,12 @@ LazyData: true
 Imports: 
     drake (>= 7.0.0),
     dplyr,
+    e1071,
     future.batchtools,
     portalr,
     rmarkdown,
-    tidyr
+    tidyr,
+    magrittr
 Suggests:
     testthat
 Remotes: 

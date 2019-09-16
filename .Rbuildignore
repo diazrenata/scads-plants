@@ -1,3 +1,7 @@
-^scadsplants\.Rproj$
+^.*\.Rproj$
 ^\.Rproj\.user$
 ^LICENSE\.md$
+analysis/
+analysis/*
+drake/
+drake/*
