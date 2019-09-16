@@ -67,7 +67,7 @@ if(grepl("ufhpc", nodename)) {
   make(all,
        force = TRUE,
        cache = cache,
-       cache_log_file = here::here("drake", "cache_log.txt"),
+       cache_log_file = here::here("analysis", "drake", "cache_log.txt"),
        verbose = 2,
        parallelism = "future",
        jobs = 64,
