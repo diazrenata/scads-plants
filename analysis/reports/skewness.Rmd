@@ -4,7 +4,7 @@ output: github_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 library(drake)
 library(dplyr)
 library(ggplot2)
@@ -31,11 +31,14 @@ uskew <- skew_df %>%
   ungroup()
 
 uskew
+
+nyears <- length(unique(uskew$year))
 ```
 
 Skewness is not entirely unique to an element of the FS, but you don't get re-used skews until you have extremely small feasible sets.
 
-```{r skewness violins} 
+### Distribution of skewnesses
+```{r skewness violins, fig.height = 10, fig.width = 6} 
 
 skew_violins <- ggplot(data = skew_df, aes(x = 0, y = skew)) +
   geom_violin(data = filter(skew_df, source == "sampled"),  aes(x = 0, y = skew, color = season)) +
@@ -45,4 +48,97 @@ skew_violins <- ggplot(data = skew_df, aes(x = 0, y = skew)) +
   theme_bw()
 
 skew_violins
+```
+
+2009 is problematic because the communities are very small (S = 1 and 3, N = 2 and 5 respectively). Similarly, winter of 2000 had 12 individuals of 2 species. Notably, winter 1996 had 34 individuals of 3 species, and this appears to be enough to get some interesting variation going.
+
+So far, this result contrasts with what I was finding earlier. Skewness is not always an incredible outlier. I am going to do this with the 1994 data to confirm that I haven't messed up somewhere.
+
+If this holds (and perhaps even if it doesn't) perhaps it's worth re-investigating Legendre approximation over a broader set of datasets. It looks like the ones I pulled might have been unusual. 
+
+### Heatmaps 
+
+```{r heatmap of fs, fig.height = 20, fig.width = 10}
+
+ranked_skew_df <- skew_df %>%
+  filter(source == "sampled") %>%
+  group_by(year, season, treatment) %>%
+  arrange(skew) %>%
+  mutate(skew_rank = row_number()) %>%
+  mutate(skew_percentile = 100*(skew_rank / max(skew_rank))) %>%
+  ungroup() 
+
+observed_percentile <- skew_df %>%
+  filter(source == "observed")
+
+observed_percentile$skew_percentile <- NA
+
+for(i in 1:nrow(observed_percentile)) {
+  this_pool <- filter(ranked_skew_df, year == observed_percentile$year[i],
+                      season == observed_percentile$season[i])
+  
+  this_rank <-max(filter(this_pool, skew <= observed_percentile$skew[i])$skew_rank)
+  
+  observed_percentile$skew_percentile[i] = 100 * (this_rank / nrow(this_pool))
+}
+
+ranked_skew_df <- bind_rows(ranked_skew_df, observed_percentile)
+
+ranked_skew_long <- skew_long_df %>%
+  filter(year != 2009) %>%
+  left_join(ranked_skew_df, by = c("sim", "source", "season", "year", "treatment"))
+
+skew_labels <- ranked_skew_long %>%
+  group_by(year, season, treatment) %>%
+  mutate(rank_y = .75 * max(abund)) %>%
+  ungroup() %>%
+  filter(source == "observed") %>%
+  group_by(year, season, treatment) %>%
+  filter(rank == floor(median(rank))) %>%
+  ungroup()
+
+heatmaps <- ggplot(data = ranked_skew_long, aes(x = rank, y = abund, color = skew_percentile)) +
+  geom_line(data = filter(ranked_skew_long, source == "sampled"), aes(x = rank, y = abund, color = skew_percentile, group = sim), alpha = .05) +
+  geom_point(data = filter(ranked_skew_long, source == "observed"), aes(x = rank, y = abund, color = skew_percentile)) + 
+  geom_label(data = skew_labels, aes(x = rank, y = rank_y, color = skew_percentile, label = paste0("Obs. %ile: ", signif(skew_percentile, digits = 3))), nudge_x = .25) +
+  facet_wrap(facets = c("season", "year"), ncol = 2, strip.position = "top", scales = "free", dir = "v") +
+  theme_bw() +
+  scale_color_viridis_c(option = "plasma", end = .7)
+
+heatmaps
+
+```
+
+### Relating observed skewness to S and N
+```{r obs S and N, fig.height = 12, fig.width = 5}
+
+obs_sn <- ranked_skew_long %>%
+  filter(source == "observed") %>%
+  group_by(season, year, treatment, skew_percentile) %>%
+  summarize(nind = sum(abund),
+            nspp = max(rank)) %>%
+  ungroup() %>%
+  mutate(year = as.factor(year))
+
+
+skew_s <-ggplot(data = obs_sn, aes (x =nspp, y = skew_percentile, color = year)) +
+  geom_point() +
+  theme_bw() +
+  scale_color_viridis_d(end = .7) +
+  ggtitle("Skewness vs N / S")
+  ggtitle("Skewness vs S")
+
+skew_n <- ggplot(data = obs_sn, aes (x = nind, y = skew_percentile, color = year)) +
+  geom_point() +
+  theme_bw() +
+  scale_color_viridis_d(end = .7) +
+  ggtitle("Skewness vs N")
+
+skew_ns <- ggplot(data = obs_sn, aes (x = nind / nspp, y = skew_percentile, color = year)) +
+  geom_point() +
+  theme_bw() +
+  scale_color_viridis_d(end = .7) +
+  ggtitle("Skewness vs N / S")
+
+gridExtra::grid.arrange(grobs = list(skew_s, skew_n, skew_ns), ncol = 1)
 ```
