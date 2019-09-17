@@ -55,4 +55,8 @@ small_statevar_plot <- ggplot(data = small_years_dat, aes(x = nspp, y = nind, la
   scale_color_viridis_d(end = .6)
 
 small_statevar_plot
+
+small_years_dat
+
+```
 ```

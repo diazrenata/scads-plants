@@ -43,3 +43,23 @@ small_statevar_plot
 ```
 
 ![](statevars_files/figure-markdown_github/get%20smaller%20years-1.png)
+
+``` r
+small_years_dat
+```
+
+    ## # A tibble: 10 x 5
+    ##     year season treatment  nspp  nind
+    ##    <dbl> <chr>  <chr>     <int> <int>
+    ##  1  1996 summer control      18  1348
+    ##  2  1996 winter control       3    34
+    ##  3  1999 summer control      23  1084
+    ##  4  1999 winter control       7   215
+    ##  5  2000 summer control      13  1051
+    ##  6  2000 winter control       2    12
+    ##  7  2003 summer control       4  3995
+    ##  8  2003 winter control      17  4675
+    ##  9  2009 summer control       1     2
+    ## 10  2009 winter control       3     5
+
+\`\`\`

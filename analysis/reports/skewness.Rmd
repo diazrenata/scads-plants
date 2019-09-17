@@ -1,0 +1,48 @@
+---
+title: "Skewness report"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(drake)
+library(dplyr)
+library(ggplot2)
+
+## Set up the cache and config
+db <- DBI::dbConnect(RSQLite::SQLite(), here::here("analysis", "drake", "drake-cache.sqlite"))
+cache <- storr::storr_dbi("datatable", "keystable", db)
+
+```
+
+```{r load stuff}
+loadd(skew_long_df, cache = cache)
+loadd(skew_df, cache = cache)
+```
+
+### Is skewness unique to an element of the FS?
+
+```{r unique skew}
+
+uskew <- skew_df %>%
+  group_by(year, season, treatment) %>%
+  summarize(n_elements = n(),
+            n_skews = length(unique(skew))) %>%
+  ungroup()
+
+uskew
+```
+
+Skewness is not entirely unique to an element of the FS, but you don't get re-used skews until you have extremely small feasible sets.
+
+```{r skewness violins} 
+
+skew_violins <- ggplot(data = skew_df, aes(x = 0, y = skew)) +
+  geom_violin(data = filter(skew_df, source == "sampled"),  aes(x = 0, y = skew, color = season)) +
+  geom_point(data = filter(skew_df, source == "observed"),  aes(x = 0, y = skew, color = season)) +
+  facet_grid(rows = vars(year), cols = vars(season), switch = "y") +
+  scale_color_viridis_d(end = .8, direction = -1) +
+  theme_bw()
+
+skew_violins
+```
