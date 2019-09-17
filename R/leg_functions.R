@@ -14,7 +14,10 @@ get_all_coeffs <- function(fs_samples_df, nleg = NULL) {
   if(is.null(nleg)) {
     nspp <- max(fs_samples_df$rank)
     nleg <- min(10, nspp - 2)
-  }
+    if(nleg < 2) {
+      nleg <- 2
+    }
+    }
 
   get_coeffs <- function(sim_index, samples_df, nleg) {
     this_vec <- dplyr::filter(samples_df, sim == sim_index)$abund

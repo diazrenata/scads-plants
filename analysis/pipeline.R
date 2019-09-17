@@ -42,7 +42,8 @@ sample_plan <- drake_plan(
   fs_df = target(dplyr::bind_rows(fs_list)),
   skew_list = target(MATSS::collect_analyses(list(skew)), transform = combine(skew)),
   skew_df = target(dplyr::bind_rows(skew_list)),
-  skew_long_df = target(dplyr::left_join(fs_df, skew_df, by = c("sim", "year", "season", "treatment", "source")))
+  skew_long_df = target(dplyr::left_join(fs_df, skew_df, by = c("sim", "year", "season", "treatment", "source"))),
+  cd_long_df = target(dplyr::left_join(cds_df, skew_df, by = c("sim", "year", "season", "treatment", "source")))
 )
 
 # reports
