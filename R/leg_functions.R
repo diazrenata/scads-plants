@@ -15,7 +15,11 @@ get_all_coeffs <- function(fs_samples_df, nleg = NULL) {
     nspp <- max(fs_samples_df$rank)
     nleg <- min(10, nspp - 2)
     if(nleg < 2) {
-      nleg <- 2
+      return(data.frame(
+        sim = unique(fs_samples_df$sim),
+        parameter = NA,
+        value = NA
+      ))
     }
     }
 
