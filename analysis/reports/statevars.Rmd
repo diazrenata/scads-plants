@@ -1,0 +1,37 @@
+---
+title: "State vars report"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(drake)
+library(dplyr)
+library(ggplot2)
+
+## Set up the cache and config
+db <- DBI::dbConnect(RSQLite::SQLite(), here::here("analysis", "drake", "drake-cache.sqlite"))
+cache <- storr::storr_dbi("datatable", "keystable", db)
+
+```
+
+```{r load stuff}
+
+loadd(all_dat, cache = cache)
+
+all_dat <- bind_rows(all_dat)
+
+all_dat <- all_dat %>%
+  group_by(year, season, treatment) %>%
+  summarize(nspp = max(rank),
+            nind = sum(abund)) %>%
+  ungroup()
+  
+statevar_plot <- ggplot(data = all_dat, aes(x = nspp, y = nind, label = year, color = season)) +
+  geom_label() +
+  theme_bw() +
+  scale_color_viridis_d(end = .6)
+
+statevar_plot
+
+```

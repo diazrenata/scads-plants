@@ -6,7 +6,7 @@ library(scadsplants)
 #expose_imports(scads)
 expose_imports(scadsplants)
 
-years <- 1990:2005
+years <- 1994:2010
 
 #years <- c(1994, 2000)
 
@@ -14,7 +14,7 @@ years <- 1990:2005
 datasets_plan <- drake_plan(
 dat =target(get_plant_sad(year, season, treatment),
             transform = cross(year = !!years,
-                            season = c("summer"),
+                            season = c("summer", "winter"),
                             treatment = "control"),
             trigger = trigger(command = FALSE)),
 all_dat = target(MATSS::collect_analyses(list(dat)), transform = combine(dat))
