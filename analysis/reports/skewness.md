@@ -54,3 +54,45 @@ If this holds (and perhaps even if it doesn't) perhaps it's worth re-investigati
     ## [1] "labels"
 
 ![](skewness_files/figure-markdown_github/obs%20S%20and%20N-1.png)
+
+### Distribution of centroid distances
+
+    ## Warning: Removed 105 rows containing non-finite values (stat_ydensity).
+
+    ## Warning: Removed 4 rows containing missing values (geom_point).
+
+![](skewness_files/figure-markdown_github/distance%20violins-1.png)
+
+### Heatmaps
+
+    ## Warning in max(filter(this_pool, centroid_dist <=
+    ## observed_percentile$centroid_dist[i])$dist_rank): no non-missing arguments
+    ## to max; returning -Inf
+
+    ## Warning in max(filter(this_pool, centroid_dist <=
+    ## observed_percentile$centroid_dist[i])$dist_rank): no non-missing arguments
+    ## to max; returning -Inf
+
+    ## Warning in max(filter(this_pool, centroid_dist <=
+    ## observed_percentile$centroid_dist[i])$dist_rank): no non-missing arguments
+    ## to max; returning -Inf
+
+    ## Warning in max(filter(this_pool, centroid_dist <=
+    ## observed_percentile$centroid_dist[i])$dist_rank): no non-missing arguments
+    ## to max; returning -Inf
+
+![](skewness_files/figure-markdown_github/distheatmap%20of%20fs-1.png)
+
+### Relating observed centroid distance to S and N
+
+    ## $title
+    ## [1] "Centroid distance vs S"
+    ## 
+    ## attr(,"class")
+    ## [1] "labels"
+
+![](skewness_files/figure-markdown_github/distobs%20S%20and%20N-1.png)
+
+### Skewness vs distance
+
+![](skewness_files/figure-markdown_github/skew%20v%20dist-1.png)

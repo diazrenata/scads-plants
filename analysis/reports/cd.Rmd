@@ -3,7 +3,7 @@ title: "Distance to centroid report"
 output: github_document
 ---
 
-```{r setup, include=FALSE}
+```{r distsetup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 library(drake)
 library(dplyr)
@@ -15,12 +15,16 @@ cache <- storr::storr_dbi("datatable", "keystable", db)
 
 ```
 
-```{r load stuff}
+```{r distload stuff}
 loadd(cd_long_df, cache = cache)
 loadd(cds_df, cache = cache)
+
+cds_df <- cds_df %>%
+  select(-abund, -rank) %>%
+  distinct()
 ```
 
-### Distribution of skewnesses
+### Distribution of centroid distances
 ```{r distance violins, fig.height = 10, fig.width = 6} 
 
 dist_violins <- ggplot(data = cds_df, aes(x = 0, y = centroid_dist)) +
@@ -33,15 +37,9 @@ dist_violins <- ggplot(data = cds_df, aes(x = 0, y = centroid_dist)) +
 dist_violins
 ```
 
-2009 is problematic because the communities are very small (S = 1 and 3, N = 2 and 5 respectively). Similarly, winter of 2000 had 12 individuals of 2 species. Notably, winter 1996 had 34 individuals of 3 species, and this appears to be enough to get some interesting variation going.
-
-So far, this result contrasts with what I was finding earlier. Skewness is not always an incredible outlier. I am going to do this with the 1994 data to confirm that I haven't messed up somewhere.
-
-If this holds (and perhaps even if it doesn't) perhaps it's worth re-investigating Legendre approximation over a broader set of datasets. It looks like the ones I pulled might have been unusual. 
-
 ### Heatmaps 
 
-```{r heatmap of fs, fig.height = 20, fig.width = 10}
+```{r distheatmap of fs, fig.height = 20, fig.width = 10}
 
 ranked_cds_df <- cds_df %>%
   filter(source == "sampled") %>%
@@ -80,7 +78,7 @@ cd_labels <- ranked_cd_long %>%
   filter(rank == floor(median(rank))) %>%
   ungroup()
 
-heatmaps <- ggplot(data = ranked_cd_long, aes(x = rank, y = abund, color = dist_percentile)) +
+dist_heatmaps <- ggplot(data = ranked_cd_long, aes(x = rank, y = abund, color = dist_percentile)) +
   geom_line(data = filter(ranked_cd_long, source == "sampled"), aes(x = rank, y = abund, color = dist_percentile, group = sim), alpha = .05) +
   geom_point(data = filter(ranked_cd_long, source == "observed"), aes(x = rank, y = abund, color = dist_percentile)) + 
   geom_label(data = cd_labels, aes(x = rank, y = rank_y, color = dist_percentile, label = paste0("Obs. %ile: ", signif(dist_percentile, digits = 3))), nudge_x = .25) +
@@ -88,14 +86,14 @@ heatmaps <- ggplot(data = ranked_cd_long, aes(x = rank, y = abund, color = dist_
   theme_bw() +
   scale_color_viridis_c(option = "plasma", end = .7)
 
-heatmaps
+dist_heatmaps
 
 ```
 
-### Relating observed skewness to S and N
-```{r obs S and N, fig.height = 12, fig.width = 5}
+### Relating observed centroid distance to S and N
+```{r distobs S and N, fig.height = 12, fig.width = 5}
 
-obs_sn <- ranked_cd_long %>%
+obs_sn_dist <- ranked_cd_long %>%
   filter(source == "observed") %>%
   group_by(season, year, treatment, dist_percentile) %>%
   summarize(nind = sum(abund),
@@ -104,24 +102,24 @@ obs_sn <- ranked_cd_long %>%
   mutate(year = as.factor(year))
 
 
-dist_s <-ggplot(data = obs_sn, aes (x =nspp, y = dist_percentile, color = year)) +
+dist_s <-ggplot(data = obs_sn_dist, aes (x =nspp, y = dist_percentile, color = year)) +
   geom_point() +
   theme_bw() +
   scale_color_viridis_d(end = .7) +
   ggtitle("Centroid dist vs N / S")
-  ggtitle("Skewness vs S")
+  ggtitle("Centroid distance vs S")
 
-dist_n <- ggplot(data = obs_sn, aes (x = nind, y = dist_percentile, color = year)) +
+dist_n <- ggplot(data = obs_sn_dist, aes (x = nind, y = dist_percentile, color = year)) +
   geom_point() +
   theme_bw() +
   scale_color_viridis_d(end = .7) +
-  ggtitle("Skewness vs N")
+  ggtitle("Centroid distance vs N")
 
-dist_ns <- ggplot(data = obs_sn, aes (x = nind / nspp, y = dist_percentile, color = year)) +
+dist_ns <- ggplot(data = obs_sn_dist, aes (x = nind / nspp, y = dist_percentile, color = year)) +
   geom_point() +
   theme_bw() +
   scale_color_viridis_d(end = .7) +
-  ggtitle("Skewness vs N / S")
+  ggtitle("Centroid distance vs N / S")
 
 gridExtra::grid.arrange(grobs = list(dist_s, dist_n, dist_ns), ncol = 1)
 ```
