@@ -63,7 +63,7 @@ If this holds (and perhaps even if it doesn't) perhaps it's worth re-investigati
 
 ![](skewness_files/figure-markdown_github/distance%20violins-1.png)
 
-### Heatmaps
+### Heatmaps of distance to centroid
 
     ## Warning in max(filter(this_pool, centroid_dist <=
     ## observed_percentile$centroid_dist[i])$dist_rank): no non-missing arguments
@@ -96,3 +96,31 @@ If this holds (and perhaps even if it doesn't) perhaps it's worth re-investigati
 ### Skewness vs distance
 
 ![](skewness_files/figure-markdown_github/skew%20v%20dist-1.png)
+
+### Heatmaps of coeffs
+
+    ## Warning: Removed 2 rows containing missing values (geom_path).
+
+    ## geom_path: Each group consists of only one observation. Do you need to
+    ## adjust the group aesthetic?
+    ## geom_path: Each group consists of only one observation. Do you need to
+    ## adjust the group aesthetic?
+    ## geom_path: Each group consists of only one observation. Do you need to
+    ## adjust the group aesthetic?
+
+    ## Warning: Removed 4 rows containing missing values (geom_point).
+
+![](skewness_files/figure-markdown_github/coeffs%20heatmaps-1.png)
+
+    ## Warning: Removed 2 rows containing missing values (geom_path).
+
+    ## geom_path: Each group consists of only one observation. Do you need to
+    ## adjust the group aesthetic?
+    ## geom_path: Each group consists of only one observation. Do you need to
+    ## adjust the group aesthetic?
+    ## geom_path: Each group consists of only one observation. Do you need to
+    ## adjust the group aesthetic?
+
+    ## Warning: Removed 4 rows containing missing values (geom_point).
+
+![](skewness_files/figure-markdown_github/coeffs%20heatmaps-2.png)
