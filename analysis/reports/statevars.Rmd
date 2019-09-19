@@ -57,7 +57,7 @@ nspp_hist
 
 small_years <- all_dat %>%
   filter(nspp <= 40,
-         nind <= 30000) %>%
+         nind <= 10000) %>%
   group_by(year) %>%
   summarize(nb_seasons = n()) %>%
   ungroup() %>%
