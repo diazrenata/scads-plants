@@ -4,9 +4,13 @@ library(feasiblesads)
 library(scadsplants)
 
 #expose_imports(scads)
-expose_imports(scadsplants)
+#expose_imports(scadsplants)
 
-years <-c(1994, 1996, 1999, 2000, 2003, 2009)
+years <-c(1983, 1985, 1986, 1988, 1991, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009)
+
+max_s <-40
+
+max_n <- 30000
 
 # get data
 datasets_plan <- drake_plan(
@@ -26,24 +30,26 @@ for(i in 1:(nrow(datasets_plan) -1)) {
 }
 
 sample_plan <- drake_plan(
-  master_p_table = target(build_p_table(all_dat)),
+  master_p_table = target(feasiblesads::fill_ps(max_s = !!max_s,
+                                                max_n = !!max_n,
+                                                storeyn = FALSE)),
   fs = target(sample_fs_long(dat, nsamples, p_table),
               transform = map(dat = !!dat_targets, nsamples = 10000, p_table = master_p_table)
   ),
   skew = target(add_skew(fs),
                 transform = map(fs)),
-  coeffs = target(get_all_coeffs(fs),
-                  transform = map(fs)),
-  cds = target(get_all_cds(fs, coeffs),
-               transform = map(fs, coeffs)),
-  cds_list = target(MATSS::collect_analyses(list(cds)), transform = combine(cds)),
-  cds_df = target(dplyr::bind_rows(cds_list)),
+  # coeffs = target(get_all_coeffs(fs),
+  #                 transform = map(fs)),
+  # cds = target(get_all_cds(fs, coeffs),
+  #              transform = map(fs, coeffs)),
+  # cds_list = target(MATSS::collect_analyses(list(cds)), transform = combine(cds)),
+  # cds_df = target(dplyr::bind_rows(cds_list)),
   fs_list = target(MATSS::collect_analyses(list(fs)), transform = combine(fs)),
   fs_df = target(dplyr::bind_rows(fs_list)),
   skew_list = target(MATSS::collect_analyses(list(skew)), transform = combine(skew)),
   skew_df = target(dplyr::bind_rows(skew_list)),
-  skew_long_df = target(dplyr::left_join(fs_df, skew_df, by = c("sim", "year", "season", "treatment", "source"))),
-  cd_long_df = target(dplyr::left_join(cds_df, skew_df, by = c("sim", "year", "season", "treatment", "source")))
+  skew_long_df = target(dplyr::left_join(fs_df, skew_df, by = c("sim", "year", "season", "treatment", "source")))#,
+#  cd_long_df = target(dplyr::left_join(cds_df, skew_df, by = c("sim", "year", "season", "treatment", "source")))
 )
 
 # reports

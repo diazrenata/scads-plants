@@ -36,11 +36,28 @@ statevar_plot
 
 ```
 
+```{r histograms}
+
+nind_hist <- ggplot(data = all_dat, aes(x = nind)) +
+  geom_density() +
+  theme_bw()
+
+nind_hist
+
+
+nspp_hist <- ggplot(data = all_dat, aes(x = nspp)) +
+  geom_density() +
+  theme_bw()
+
+nspp_hist
+
+```
+
 ```{r get smaller years}
 
 small_years <- all_dat %>%
-  filter(nspp <= 25,
-         nind <= 10000) %>%
+  filter(nspp <= 40,
+         nind <= 30000) %>%
   group_by(year) %>%
   summarize(nb_seasons = n()) %>%
   ungroup() %>%
