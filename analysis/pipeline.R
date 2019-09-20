@@ -10,26 +10,34 @@ max_s <-40
 
 max_n <- 15000
 
-years_dat <- portalr::plant_abundance(level = "Treatment", type = "Annuals", plots = "All", unknowns = F, correct_sp = T, shape = "flat", min_quads = 16) %>%
+summer <- portalr::plant_abundance(level = "Treatment", type = "Summer Annuals", plots = "All", unknowns = F, correct_sp = T, shape = "flat", min_quads = 16) %>%
   dplyr::filter(treatment == "control") %>%
-  dplyr::select(year, species, abundance, season) %>%
+  dplyr::select(year, species, abundance) %>%
   dplyr::rename(abund = abundance) %>%
-  dplyr::group_by(year, season) %>%
-  dplyr::arrange(abund) %>%
-  dplyr::mutate(rank = dplyr::row_number()) %>%
-  dplyr::ungroup() %>%
-  dplyr::select(-species) %>%
-  dplyr::group_by(year, season) %>%
-  dplyr::summarize(nspp = max(rank),
+  dplyr::group_by(year) %>%
+  dplyr::summarize(nspp = dplyr::n(),
             nind = sum(abund)) %>%
   dplyr::ungroup() %>%
+  dplyr::mutate(season = "summer")
+
+winter <- portalr::plant_abundance(level = "Treatment", type = "Winter Annuals", plots = "All", unknowns = F, correct_sp = T, shape = "flat", min_quads = 16) %>%
+  dplyr::filter(treatment == "control") %>%
+  dplyr::select(year, species, abundance) %>%
+  dplyr::rename(abund = abundance) %>%
+  dplyr::group_by(year) %>%
+  dplyr::summarize(nspp = dplyr::n(),
+                   nind = sum(abund)) %>%
+  dplyr::ungroup() %>%
+  dplyr::mutate(season = "winter")
+
+years_dat <- dplyr::bind_rows(summer, winter) %>%
   dplyr::group_by(year) %>%
   dplyr::summarize(nspp = max(nspp),
-                   nind = max(nind)) %>%
-  dplyr::ungroup() %>%
+            nind = max(nind)) %>%
   dplyr::filter(nspp <= max_s,
          nind <= max_n) %>%
   dplyr::select(year)
+
 
 years <-years_dat$year
 
