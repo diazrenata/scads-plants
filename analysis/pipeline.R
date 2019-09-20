@@ -10,7 +10,7 @@ years <-c(1986, 1994, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2006, 2007
 
 max_s <-40
 
-max_n <- 15000
+max_n <- 20000
 
 # get data
 datasets_plan <- drake_plan(
