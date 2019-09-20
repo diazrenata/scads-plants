@@ -6,11 +6,33 @@ library(scadsplants)
 #expose_imports(scads)
 #expose_imports(scadsplants)
 
-years <-c(1986, 1994, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2006, 2007, 2009)
-
 max_s <-40
 
-max_n <- 20000
+max_n <- 15000
+
+years_dat <- portalr::plant_abundance(level = "Treatment", type = "Annuals", plots = "All", unknowns = F, correct_sp = T, shape = "flat", min_quads = 16) %>%
+  dplyr::filter(treatment == "control") %>%
+  dplyr::select(year, species, abundance, season) %>%
+  dplyr::rename(abund = abundance) %>%
+  dplyr::group_by(year, season) %>%
+  dplyr::arrange(abund) %>%
+  dplyr::mutate(rank = dplyr::row_number()) %>%
+  dplyr::ungroup() %>%
+  dplyr::select(-species) %>%
+  dplyr::group_by(year, season) %>%
+  dplyr::summarize(nspp = max(rank),
+            nind = sum(abund)) %>%
+  dplyr::ungroup() %>%
+  dplyr::group_by(year) %>%
+  dplyr::summarize(nspp = max(nspp),
+                   nind = max(nind)) %>%
+  dplyr::ungroup() %>%
+  dplyr::filter(nspp <= max_s,
+         nind <= max_n) %>%
+  dplyr::select(year)
+
+years <-years_dat$year
+
 
 # get data
 datasets_plan <- drake_plan(

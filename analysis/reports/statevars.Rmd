@@ -9,20 +9,24 @@ library(drake)
 library(dplyr)
 library(ggplot2)
 
-## Set up the cache and config
-db <- DBI::dbConnect(RSQLite::SQLite(), here::here("analysis", "drake", "drake-cache.sqlite"))
-cache <- storr::storr_dbi("datatable", "keystable", db)
-
 ```
 
 ```{r load stuff}
+  all_dat <- portalr::plant_abundance(level = "Treatment", type = "Annuals", plots = "All", unknowns = F, correct_sp = T, shape = "flat", min_quads = 16) %>%
+    dplyr::filter(treatment == "control") %>%
+    dplyr::select(year, species, abundance, season) %>%
+    dplyr::rename(abund = abundance) %>%
+  dplyr::group_by(year, season) %>%
+  dplyr::arrange(abund) %>%
+    dplyr::mutate(rank = dplyr::row_number()) %>% 
+  dplyr::ungroup() %>%
+  dplyr::select(-species) %>%
+  dplyr::mutate(sim = -99,
+                  source = "observed")
 
-loadd(all_dat, cache = cache)
-
-all_dat <- bind_rows(all_dat)
 
 all_dat <- all_dat %>%
-  group_by(year, season, treatment) %>%
+  group_by(year, season) %>%
   summarize(nspp = max(rank),
             nind = sum(abund)) %>%
   ungroup()
@@ -57,7 +61,7 @@ nspp_hist
 
 small_years <- all_dat %>%
   filter(nspp <= 40,
-         nind <= 10000) %>%
+         nind <= 15000) %>%
   group_by(year) %>%
   summarize(nb_seasons = n()) %>%
   ungroup() %>%
