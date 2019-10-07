@@ -192,4 +192,19 @@ skew_ns <- ggplot(data = obs_sn, aes (x = nind / nspp, y = skew_percentile)) +
 gridExtra::grid.arrange(grobs = list(skew_s, skew_n, skew_ns), nrow = 1)
 ```
 
+## Skewnesses together
+
+
+
+```{r all skews}
+
+
+all_skews_freqplot <- ggplot(data = filter(ranked_skew_df, source == "sampled"), aes(x = 0, y = skew)) +
+  geom_violin() +
+  theme_bw()
+
+all_skews_freqplot
+
+```
+
 

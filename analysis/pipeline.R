@@ -66,7 +66,7 @@ sample_plan <- drake_plan(
   fs = target(sample_fs_long(dat, nsamples, p_table),
               transform = map(dat = !!dat_targets, nsamples = 10000, p_table = master_p_table)
   ),
-  skew = target(add_skew(fs),
+  di = target(add_dis(fs),
                 transform = map(fs)),
   # coeffs = target(get_all_coeffs(fs),
   #                 transform = map(fs)),
@@ -76,9 +76,9 @@ sample_plan <- drake_plan(
   # cds_df = target(dplyr::bind_rows(cds_list)),
   fs_list = target(MATSS::collect_analyses(list(fs)), transform = combine(fs)),
   fs_df = target(dplyr::bind_rows(fs_list)),
-  skew_list = target(MATSS::collect_analyses(list(skew)), transform = combine(skew)),
-  skew_df = target(dplyr::bind_rows(skew_list)),
-  skew_long_df = target(dplyr::left_join(fs_df, skew_df, by = c("sim", "year", "season", "treatment", "source")))#,
+  di_list = target(MATSS::collect_analyses(list(di)), transform = combine(di)),
+  di_df = target(dplyr::bind_rows(di_list)),
+  di_long_df = target(dplyr::left_join(fs_df, di_df, by = c("sim", "year", "season", "treatment", "source")))#,
 #  cd_long_df = target(dplyr::left_join(cds_df, skew_df, by = c("sim", "year", "season", "treatment", "source")))
 )
 
