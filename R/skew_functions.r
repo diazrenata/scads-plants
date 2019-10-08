@@ -29,7 +29,7 @@ add_skew <- function(fs_samples_df) {
 #' @importFrom vegan diversity
 add_dis <- function(fs_samples_df) {
 
-  groupvars <- colnames(fs_samples_df)[ which(colnames(fs_samples_df) != "abund")]
+  groupvars <- colnames(fs_samples_df)[ which(!(colnames(fs_samples_df) %in% c("abund", "rank")))]
 
   sim_dis <- fs_samples_df %>%
     dplyr::group_by_at(.vars = groupvars) %>%
