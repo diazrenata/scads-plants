@@ -7,7 +7,7 @@
 add_dis(fs_samples_df)
 }
 \arguments{
-\item{fs_samples_df}{df of all samples, with columns for sim, year, season, treatment, source}
+\item{fs_samples_df}{df of all samples, with column for abundance}
 }
 \value{
 summary of skewness per sample
