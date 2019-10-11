@@ -10,3 +10,5 @@ drake/*
 .future
 .drake/
 .drake/*
+.DS_Store
+*.DS_Store

@@ -8,6 +8,7 @@ knitr::opts_chunk$set(echo = FALSE)
 library(drake)
 library(dplyr)
 library(ggplot2)
+library(scadsplants)
 
 ## Set up the cache and config
 db <- DBI::dbConnect(RSQLite::SQLite(), here::here("analysis", "drake", "drake-cache.sqlite"))
@@ -40,12 +41,12 @@ nyears <- length(unique(uskew$year))
 Skewness is not entirely unique to an element of the FS, but you don't get re-used skews until you have extremely small feasible sets.
 
 ### Distribution of skewnesses
-```{r dist of skew, fig.height = 25, fig.width = 12} 
+```{r dist of skew, fig.height = 10, fig.width = 6} 
 
 skew_violins <- ggplot(data = di_df, aes(x = 0, y = skew)) +
   geom_violin(data = filter(di_df, source == "sampled"),  aes(x = 0, y = skew, color = season)) +
   geom_point(data = filter(di_df, source == "observed"),  aes(x = 0, y = skew, color = season)) +
- facet_wrap(c("year", "season"), ncol = 4, strip.position = "top") +
+ facet_wrap(c("year", "season"), ncol = 5, strip.position = "top") +
   scale_color_viridis_d(end = .8, direction = -1) +
   theme_bw()
 
@@ -61,12 +62,12 @@ If this holds (and perhaps even if it doesn't) perhaps it's worth re-investigati
 
 #### Shannon violins
 
-```{r shannon violins, fig.height = 25, fig.width = 12} 
+```{r shannon violins,  fig.height = 10, fig.width = 6} 
 
 shannon_violins <- ggplot(data = di_df, aes(x = 0, y = shannon)) +
   geom_violin(data = filter(di_df, source == "sampled"),  aes(x = 0, y = shannon, color = season)) +
   geom_point(data = filter(di_df, source == "observed"),  aes(x = 0, y = shannon, color = season)) +
- facet_wrap(c("year", "season"), ncol = 4, strip.position = "top") +
+ facet_wrap(c("year", "season"), ncol = 5, strip.position = "top") +
   scale_color_viridis_d(end = .8, direction = -1) +
   theme_bw()
 
@@ -75,12 +76,12 @@ shannon_violins
 
 #### Simpson violins
 
-```{r simspon violins, fig.height = 25, fig.width = 12} 
+```{r simspon violins,  fig.height = 10, fig.width = 6} 
 
 simpson_violins <- ggplot(data = di_df, aes(x = 0, y = simpson)) +
   geom_violin(data = filter(di_df, source == "sampled"),  aes(x = 0, y = simpson, color = season)) +
   geom_point(data = filter(di_df, source == "observed"),  aes(x = 0, y = simpson, color = season)) +
- facet_wrap(c("year", "season"), ncol = 4, strip.position = "top") +
+ facet_wrap(c("year", "season"), ncol = 5, strip.position = "top") +
   scale_color_viridis_d(end = .8, direction = -1) +
   theme_bw()
 
