@@ -1,5 +1,5 @@
 ---
-title: "Skewness report"
+title: "Diversity index report"
 output: github_document
 ---
 
@@ -42,10 +42,12 @@ Skewness is not entirely unique to an element of the FS, but you don't get re-us
 
 ### Distribution of skewnesses
 ```{r dist of skew, fig.height = 10, fig.width = 6} 
+di_df <- di_df %>%
+  mutate(singletons = ifelse(grepl(di_name, pattern = "singles"), "singletons", "true"))
 
-skew_violins <- ggplot(data = di_df, aes(x = 0, y = skew)) +
-  geom_violin(data = filter(di_df, source == "sampled"),  aes(x = 0, y = skew, color = season)) +
-  geom_point(data = filter(di_df, source == "observed"),  aes(x = 0, y = skew, color = season)) +
+skew_violins <- ggplot(data = di_df, aes(x = singletons, y = skew, color = season)) +
+  geom_violin(data = filter(di_df, source == "sampled")) +
+  geom_point(data = filter(di_df, source == "observed")) +
  facet_wrap(c("year", "season"), ncol = 5, strip.position = "top") +
   scale_color_viridis_d(end = .8, direction = -1) +
   theme_bw()
@@ -64,9 +66,9 @@ If this holds (and perhaps even if it doesn't) perhaps it's worth re-investigati
 
 ```{r shannon violins,  fig.height = 10, fig.width = 6} 
 
-shannon_violins <- ggplot(data = di_df, aes(x = 0, y = shannon)) +
-  geom_violin(data = filter(di_df, source == "sampled"),  aes(x = 0, y = shannon, color = season)) +
-  geom_point(data = filter(di_df, source == "observed"),  aes(x = 0, y = shannon, color = season)) +
+shannon_violins <- ggplot(data = di_df, aes(x = singletons, y = shannon, color = season)) +
+ geom_violin(data = filter(di_df, source == "sampled")) +
+  geom_point(data = filter(di_df, source == "observed")) +
  facet_wrap(c("year", "season"), ncol = 5, strip.position = "top") +
   scale_color_viridis_d(end = .8, direction = -1) +
   theme_bw()
@@ -78,9 +80,9 @@ shannon_violins
 
 ```{r simspon violins,  fig.height = 10, fig.width = 6} 
 
-simpson_violins <- ggplot(data = di_df, aes(x = 0, y = simpson)) +
-  geom_violin(data = filter(di_df, source == "sampled"),  aes(x = 0, y = simpson, color = season)) +
-  geom_point(data = filter(di_df, source == "observed"),  aes(x = 0, y = simpson, color = season)) +
+simpson_violins <- ggplot(data = di_df, aes(x = singletons, y = simpson, color = season)) +
+ geom_violin(data = filter(di_df, source == "sampled")) +
+  geom_point(data = filter(di_df, source == "observed")) +
  facet_wrap(c("year", "season"), ncol = 5, strip.position = "top") +
   scale_color_viridis_d(end = .8, direction = -1) +
   theme_bw()
@@ -94,20 +96,20 @@ simpson_violins
 
 ranked_di_df <- di_df %>%
   filter(source == "sampled") %>%
-  group_by(year, season, treatment) %>%
+  group_by(year, season, treatment, singletons) %>%
   mutate_at(c("skew", "shannon", "simpson"), .funs = list("percentile" = get_percentiles)) %>%
   ungroup()
 
 observed_percentile <- di_df %>%
   filter(source == "observed") %>%
-  left_join(select(ranked_di_df, -sim, -source, -skew_percentile, -shannon_percentile, -simpson_percentile), by = c("year", "season", "treatment")) %>%
-  group_by(year, season, treatment) %>%
+  left_join(select(ranked_di_df, -sim, -source, -skew_percentile, -shannon_percentile, -simpson_percentile, -di_name), by = c("year", "season", "treatment", "singletons")) %>%
+  group_by(year, season, treatment, singletons) %>%
   mutate(skew_percentile = get_percentile(skew.x, a_vector = skew.y),
          shannon_percentile = get_percentile(shannon.x, a_vector = shannon.y),
          simpson_percentile = get_percentile(simpson.x, a_vector = simpson.y))  %>%
   ungroup() %>%
-  select(year, season, treatment, source, skew_percentile, shannon_percentile, simpson_percentile,
-         skew.x, shannon.x, simpson.x) %>%
+  select(year, season, treatment, source, singletons, skew_percentile, shannon_percentile, simpson_percentile,
+         skew.x, shannon.x, simpson.x, di_name) %>%
   rename(skew = skew.x,
          shannon = shannon.x,
          simpson = simpson.x) %>%
@@ -117,9 +119,9 @@ observed_percentile <- di_df %>%
 ranked_di_df <- bind_rows(ranked_di_df, observed_percentile)
 
 ranked_di_long <- ranked_di_df %>%
-  tidyr::gather(-sim, -year, -season, -treatment, -source, key = "variable", value = "value")
+  tidyr::gather(-sim, -year, -season, -treatment, -source, -di_name, -singletons, key = "variable", value = "value")
 
-di_hists <- ggplot(data = filter(ranked_di_long, source == "observed", variable %in% c("skew_percentile", "shannon_percentile", "simpson_percentile")), aes(x = season, y= value,color = season)) +
+di_hists <- ggplot(data = filter(ranked_di_long, source == "observed", singletons == "true", variable %in% c("skew_percentile", "shannon_percentile", "simpson_percentile")), aes(x = season, y= value,color = season)) +
   geom_violin() +
   geom_jitter(alpha = .7, height = 0, width = .2) +
   theme_bw() +
@@ -128,6 +130,28 @@ di_hists <- ggplot(data = filter(ranked_di_long, source == "observed", variable 
 
 di_hists
 
+```
+
+### Sensitivity of percentile to adding singletons
+```{r singletons 1to1, fig.width = 4.5, fig.height = 6}
+
+singletons_1to1_dat <- filter(ranked_di_long, source == "observed", variable %in% c("skew_percentile", "shannon_percentile", "simpson_percentile"), singletons == "true") %>%
+  select(-di_name) %>%
+  left_join(filter(ranked_di_long, source == "observed", variable %in% c("skew_percentile", "shannon_percentile", "simpson_percentile"), singletons == "singletons"), by = c("sim", "year", "season", "treatment", "source", "variable")) %>%
+  select(-sim, -di_name) %>%
+  rename(true_value = value.x,
+         singletons_value = value.y) %>%
+  select(-singletons.x, -singletons.y)
+
+singletons_1to1_plot <- ggplot(data = singletons_1to1_dat, aes(x = true_value, y = singletons_value, color = season)) +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1, alpha = .5) +
+  theme_bw() +
+  facet_wrap(vars(variable, season), ncol = 2) +  
+  scale_color_viridis_d(end = .8, direction = -1)
+
+
+singletons_1to1_plot
 ```
 
 
