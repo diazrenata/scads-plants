@@ -2,6 +2,7 @@
 
 export("%>%")
 export(add_dis)
+export(add_singletons)
 export(add_skew)
 export(build_p_table)
 export(count_below)

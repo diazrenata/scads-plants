@@ -49,13 +49,16 @@ dat =target(get_plant_sad(year, season, treatment),
                             season = c("summer", "winter"),
                             treatment = "control"),
             trigger = trigger(command = FALSE)),
-all_dat = target(MATSS::collect_analyses(list(dat)), transform = combine(dat))
+dat_singles = target(add_singletons(dat),
+                     transform = map(dat)),
+all_dat = target(MATSS::collect_analyses(list(dat)), transform = combine(dat)),
+all_dat_singles = target(MATSS::collect_analyses(list(dat_singles)), transform = combine(dat_singles))
 )
 
 # sample fs
 
 dat_targets <- list()
-for(i in 1:(nrow(datasets_plan) -1)) {
+for(i in 1:(nrow(datasets_plan) -2)) {
   dat_targets[[i]] <- as.name(datasets_plan$target[i])
 }
 
