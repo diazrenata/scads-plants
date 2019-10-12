@@ -7,8 +7,10 @@ library(scadsplants)
 #expose_imports(scadsplants)
 
 max_s <-40
+max_s_to_sample <- ceiling(1.1 * max_s)
 
 max_n <- 15000
+max_n_to_sample <- max_n + ceiling((.1 * max_s))
 
 summer <- portalr::plant_abundance(level = "Treatment", type = "Summer Annuals", plots = "All", unknowns = F, correct_sp = T, shape = "flat", min_quads = 16) %>%
   dplyr::filter(treatment == "control") %>%
@@ -63,8 +65,8 @@ for(i in 1:(nrow(datasets_plan) -2)) {
 }
 
 sample_plan <- drake_plan(
-  master_p_table = target(feasiblesads::fill_ps(max_s = !!max_s,
-                                                max_n = !!max_n,
+  master_p_table = target(feasiblesads::fill_ps(max_s = !!max_s_to_sample,
+                                                max_n = !!max_n_to_sample,
                                                 storeyn = FALSE)),
   fs = target(sample_fs_long(dat, nsamples, p_table),
               transform = map(dat = !!dat_targets, nsamples = 10000, p_table = master_p_table)
