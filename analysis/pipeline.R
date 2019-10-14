@@ -73,7 +73,7 @@ sample_plan <- drake_plan(
   ),
   di = target(add_dis(fs),
                 transform = map(fs)),
-  fs_list = target(MATSS::collect_analyses(list(fs)), transform = combine(fs)),
+ fs_list = target(MATSS::collect_analyses(list(fs)), transform = combine(fs)),
   fs_df = target(dplyr::bind_rows(fs_list)),
   di_list = target(MATSS::collect_analyses(list(di)), transform = combine(di)),
   di_df = target(dplyr::bind_rows(di_list)),

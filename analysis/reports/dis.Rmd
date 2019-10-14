@@ -10,35 +10,15 @@ library(dplyr)
 library(ggplot2)
 library(scadsplants)
 
-## Set up the cache and config
-db <- DBI::dbConnect(RSQLite::SQLite(), here::here("analysis", "drake", "drake-cache.sqlite"))
-cache <- storr::storr_dbi("datatable", "keystable", db)
+# ## Set up the cache and config
+# db <- DBI::dbConnect(RSQLite::SQLite(), here::here("analysis", "drake", "drake-cache.sqlite"))
+# cache <- storr::storr_dbi("datatable", "keystable", db)
 
 ```
 
 ```{r load stuff}
-loadd(di_long_df, cache = cache)
-loadd(di_df, cache = cache)
+di_df <- read.csv(here::here("analysis", "drake", "di_df.csv"), stringsAsFactors = F)
 ```
-
-### Is skewness unique to an element of the FS?
-
-```{r unique skew}
-
-groupvars <- c("year", "season", "treatment")
-
-uskew <- di_df %>%
-  group_by_at(.vars = groupvars) %>%
-  summarize(n_elements = n(),
-            n_skews = length(unique(skew))) %>%
-  ungroup()
-
-uskew
-
-nyears <- length(unique(uskew$year))
-```
-
-Skewness is not entirely unique to an element of the FS, but you don't get re-used skews until you have extremely small feasible sets.
 
 ### Distribution of skewnesses
 ```{r dist of skew, fig.height = 10, fig.width = 6} 
@@ -129,6 +109,8 @@ di_hists <- ggplot(data = filter(ranked_di_long, source == "observed", singleton
   facet_wrap(~variable, strip.position = "top")
 
 di_hists
+
+save(ranked_di_df, ranked_di_long, file = here::here("analysis", "reports", "ranked_dis.Rds"))
 
 ```
 

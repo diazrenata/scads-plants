@@ -1,23 +1,9 @@
 Diversity index report
 ================
 
-### Is skewness unique to an element of the FS?
-
-    ## # A tibble: 6 x 5
-    ##    year season treatment n_elements n_skews
-    ##   <int> <chr>  <chr>          <int>   <int>
-    ## 1  2009 summer control            4       2
-    ## 2  2009 winter control            6       4
-    ## 3  2013 summer control         8060    7047
-    ## 4  2013 winter control        20002   19998
-    ## 5  2018 summer control        20002   20001
-    ## 6  2018 winter control        20002   20002
-
-Skewness is not entirely unique to an element of the FS, but you don't get re-used skews until you have extremely small feasible sets.
-
 ### Distribution of skewnesses
 
-    ## Warning: Removed 2 rows containing non-finite values (stat_ydensity).
+    ## Warning: Removed 3 rows containing non-finite values (stat_ydensity).
 
     ## Warning in max(data$density): no non-missing arguments to max; returning -
     ## Inf
@@ -57,14 +43,14 @@ If this holds (and perhaps even if it doesn't) perhaps it's worth re-investigati
 
 ### Frequency of diversity index percentiles
 
-    ## Warning: Removed 1 rows containing non-finite values (stat_ydensity).
+    ## Warning: Removed 2 rows containing non-finite values (stat_ydensity).
 
-    ## Warning: Removed 1 rows containing missing values (geom_point).
+    ## Warning: Removed 2 rows containing missing values (geom_point).
 
 ![](dis_files/figure-markdown_github/skewness%20percentile%20hist-1.png)
 
 ### Sensitivity of percentile to adding singletons
 
-    ## Warning: Removed 2 rows containing missing values (geom_point).
+    ## Warning: Removed 3 rows containing missing values (geom_point).
 
 ![](dis_files/figure-markdown_github/singletons%201to1-1.png)
