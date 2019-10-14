@@ -12,3 +12,4 @@ drake/*
 .drake/*
 .DS_Store
 *.DS_Store
+analysis/reports/ranked_dis.Rds
