@@ -28,7 +28,7 @@ di_df <- di_df %>%
 skew_violins <- ggplot(data = di_df, aes(x = singletons, y = skew, color = season)) +
   geom_violin(data = filter(di_df, source == "sampled")) +
   geom_point(data = filter(di_df, source == "observed")) +
- facet_wrap(c("year", "season"), ncol = 5, strip.position = "top") +
+  facet_wrap(c("year", "season"), ncol = 5, strip.position = "top") +
   scale_color_viridis_d(end = .8, direction = -1) +
   theme_bw()
 
@@ -37,19 +37,14 @@ skew_violins
 
 2009 is problematic because the communities are very small (S = 1 and 3, N = 2 and 5 respectively). Similarly, winter of 2000 had 12 individuals of 2 species. Notably, winter 1996 had 34 individuals of 3 species, and this appears to be enough to get some interesting variation going.
 
-So far, this result contrasts with what I was finding earlier. Skewness is not always an incredible outlier. I am going to do this with the 1994 data to confirm that I haven't messed up somewhere.
-
-If this holds (and perhaps even if it doesn't) perhaps it's worth re-investigating Legendre approximation over a broader set of datasets. It looks like the ones I pulled might have been unusual. 
-
-
 #### Shannon violins
 
 ```{r shannon violins,  fig.height = 10, fig.width = 6} 
 
 shannon_violins <- ggplot(data = di_df, aes(x = singletons, y = shannon, color = season)) +
- geom_violin(data = filter(di_df, source == "sampled")) +
+  geom_violin(data = filter(di_df, source == "sampled")) +
   geom_point(data = filter(di_df, source == "observed")) +
- facet_wrap(c("year", "season"), ncol = 5, strip.position = "top") +
+  facet_wrap(c("year", "season"), ncol = 5, strip.position = "top") +
   scale_color_viridis_d(end = .8, direction = -1) +
   theme_bw()
 
@@ -61,9 +56,9 @@ shannon_violins
 ```{r simspon violins,  fig.height = 10, fig.width = 6} 
 
 simpson_violins <- ggplot(data = di_df, aes(x = singletons, y = simpson, color = season)) +
- geom_violin(data = filter(di_df, source == "sampled")) +
+  geom_violin(data = filter(di_df, source == "sampled")) +
   geom_point(data = filter(di_df, source == "observed")) +
- facet_wrap(c("year", "season"), ncol = 5, strip.position = "top") +
+  facet_wrap(c("year", "season"), ncol = 5, strip.position = "top") +
   scale_color_viridis_d(end = .8, direction = -1) +
   theme_bw()
 
@@ -73,33 +68,36 @@ simpson_violins
 ### Frequency of diversity index percentiles
 
 ```{r skewness percentile hist}
+# 
+# ranked_di_df <- di_df %>%
+#   filter(source == "sampled") %>%
+#   group_by(year, season, treatment, singletons) %>%
+#   mutate_at(c("skew", "shannon", "simpson"), .funs = list("percentile" = get_percentiles)) %>%
+#   ungroup()
+# 
+# observed_percentile <- di_df %>%
+#   filter(source == "observed") %>%
+#   left_join(select(ranked_di_df, -sim, -source, -skew_percentile, -shannon_percentile, -simpson_percentile, -di_name), by = c("year", "season", "treatment", "singletons")) %>%
+#   group_by(year, season, treatment, singletons) %>%
+#   mutate(skew_percentile = get_percentile(skew.x, a_vector = skew.y),
+#          shannon_percentile = get_percentile(shannon.x, a_vector = shannon.y),
+#          simpson_percentile = get_percentile(simpson.x, a_vector = simpson.y))  %>%
+#   ungroup() %>%
+#   select(year, season, treatment, source, singletons, skew_percentile, shannon_percentile, simpson_percentile,
+#          skew.x, shannon.x, simpson.x, di_name) %>%
+#   rename(skew = skew.x,
+#          shannon = shannon.x,
+#          simpson = simpson.x) %>%
+#   distinct()
+# 
+# 
+# ranked_di_df <- bind_rows(ranked_di_df, observed_percentile)
+# 
+# ranked_di_long <- ranked_di_df %>%
+#   tidyr::gather(-sim, -year, -season, -treatment, -source, -di_name, -singletons, key = "variable", value = "value")
 
-ranked_di_df <- di_df %>%
-  filter(source == "sampled") %>%
-  group_by(year, season, treatment, singletons) %>%
-  mutate_at(c("skew", "shannon", "simpson"), .funs = list("percentile" = get_percentiles)) %>%
-  ungroup()
 
-observed_percentile <- di_df %>%
-  filter(source == "observed") %>%
-  left_join(select(ranked_di_df, -sim, -source, -skew_percentile, -shannon_percentile, -simpson_percentile, -di_name), by = c("year", "season", "treatment", "singletons")) %>%
-  group_by(year, season, treatment, singletons) %>%
-  mutate(skew_percentile = get_percentile(skew.x, a_vector = skew.y),
-         shannon_percentile = get_percentile(shannon.x, a_vector = shannon.y),
-         simpson_percentile = get_percentile(simpson.x, a_vector = simpson.y))  %>%
-  ungroup() %>%
-  select(year, season, treatment, source, singletons, skew_percentile, shannon_percentile, simpson_percentile,
-         skew.x, shannon.x, simpson.x, di_name) %>%
-  rename(skew = skew.x,
-         shannon = shannon.x,
-         simpson = simpson.x) %>%
-  distinct()
-
-
-ranked_di_df <- bind_rows(ranked_di_df, observed_percentile)
-
-ranked_di_long <- ranked_di_df %>%
-  tidyr::gather(-sim, -year, -season, -treatment, -source, -di_name, -singletons, key = "variable", value = "value")
+load(here::here("analysis", "reports", "ranked_dis.Rds"))
 
 di_hists <- ggplot(data = filter(ranked_di_long, source == "observed", singletons == "true", variable %in% c("skew_percentile", "shannon_percentile", "simpson_percentile")), aes(x = season, y= value,color = season)) +
   geom_violin() +
@@ -110,7 +108,7 @@ di_hists <- ggplot(data = filter(ranked_di_long, source == "observed", singleton
 
 di_hists
 
-save(ranked_di_df, ranked_di_long, file = here::here("analysis", "reports", "ranked_dis.Rds"))
+#save(ranked_di_df, ranked_di_long, file = here::here("analysis", "reports", "ranked_dis.Rds"))
 
 ```
 
@@ -136,4 +134,94 @@ singletons_1to1_plot <- ggplot(data = singletons_1to1_dat, aes(x = true_value, y
 singletons_1to1_plot
 ```
 
+
+Is the amount of percentile change linked to the number of elements we got from the FS?
+
+```{r get s and n}
+
+max_s <-40
+
+max_n <- 15000
+
+summer <- portalr::plant_abundance(level = "Treatment", type = "Summer Annuals", plots = "All", unknowns = F, correct_sp = T, shape = "flat", min_quads = 16) %>%
+  dplyr::filter(treatment == "control") %>%
+  dplyr::select(year, species, abundance) %>%
+  dplyr::rename(abund = abundance) %>%
+  dplyr::group_by(year) %>%
+  dplyr::summarize(nspp = dplyr::n(),
+            nind = sum(abund)) %>%
+  dplyr::ungroup() %>%
+  dplyr::mutate(season = "summer")
+
+winter <- portalr::plant_abundance(level = "Treatment", type = "Winter Annuals", plots = "All", unknowns = F, correct_sp = T, shape = "flat", min_quads = 16) %>%
+  dplyr::filter(treatment == "control") %>%
+  dplyr::select(year, species, abundance) %>%
+  dplyr::rename(abund = abundance) %>%
+  dplyr::group_by(year) %>%
+  dplyr::summarize(nspp = dplyr::n(),
+                   nind = sum(abund)) %>%
+  dplyr::ungroup() %>%
+  dplyr::mutate(season = "winter")
+
+years_dat <- dplyr::bind_rows(summer, winter) %>%
+  dplyr::group_by(year, season) %>%
+  dplyr::mutate(max_nspp = max(nspp),
+            max_nind = max(nind)) %>%
+  dplyr::filter(max_nspp <= max_s,
+         max_nind <= max_n) %>%
+  select(-max_nspp, -max_nind)
+```
+
+```{r percentile change v fs size}
+
+fs_size_info <- di_df %>%
+  filter(sim != -99, singletons == "true") %>%
+  select(season, year, treatment) %>%
+  group_by(season, year, treatment) %>%
+  summarize(n_elements = n()) %>%
+  ungroup() %>%
+  left_join(years_dat, by = c("season", "year"))
+
+percentile_change <- singletons_1to1_dat %>%
+  mutate(singletons_change = singletons_value - true_value) %>%
+  mutate(abs_change = abs(singletons_change)) %>%
+  left_join(fs_size_info, by = c("season", "year", "treatment"))
+
+pc_plot <- ggplot(data = percentile_change, aes(x = season, y = singletons_change, color = season)) +
+  geom_boxplot() +
+  theme_bw() + 
+  scale_color_viridis_d(end = .8, direction = -1) +
+  facet_wrap(vars(variable), strip.pos = "top") +
+  ggtitle("Change in percentile of true vs. with singletons")
+pc_plot
+
+nel_pc <- ggplot(data = percentile_change, aes(x = n_elements, y = singletons_change, color = season)) +
+  geom_jitter() +
+  theme_bw() +
+  scale_color_viridis_d(end = .8, direction = -1) +
+  facet_wrap(vars(season, variable), scales = "fixed", strip.pos = "top") +
+  ggtitle("Change in percentile vs. number of unique draws from FS")
+nel_pc
+
+statevars_pc <- ggplot(data = percentile_change, aes(x = nspp, y = nind, color = abs_change)) +
+  geom_point() +
+  theme_bw() +
+  scale_color_viridis_c(begin = .2, end = .8, option = "magma") +
+  facet_wrap(vars(season, variable), strip.pos = "top") +
+  ggtitle("Absolute percentile change vs. state variables")
+
+statevars_pc
+
+
+statevars_pc_large <- ggplot(data = percentile_change, aes(x = nspp, y = nind, color = abs_change)) +
+  geom_point(alpha = 0) +
+  geom_point(data = filter(percentile_change, abs_change >= 5)) +
+  theme_bw() +
+  scale_color_viridis_c(begin = .2, end = .8, option = "magma", limits = c(min(percentile_change$abs_change, na.rm = T), max(percentile_change$abs_change, na.rm = T))) +
+  facet_wrap(vars(season, variable), strip.pos = "top", drop = F) +
+  ggtitle("Absolute percentile change vs. state variables - only >5")
+
+statevars_pc_large
+
+```
 

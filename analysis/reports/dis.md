@@ -17,10 +17,6 @@ Diversity index report
 
 2009 is problematic because the communities are very small (S = 1 and 3, N = 2 and 5 respectively). Similarly, winter of 2000 had 12 individuals of 2 species. Notably, winter 1996 had 34 individuals of 3 species, and this appears to be enough to get some interesting variation going.
 
-So far, this result contrasts with what I was finding earlier. Skewness is not always an incredible outlier. I am going to do this with the 1994 data to confirm that I haven't messed up somewhere.
-
-If this holds (and perhaps even if it doesn't) perhaps it's worth re-investigating Legendre approximation over a broader set of datasets. It looks like the ones I pulled might have been unusual.
-
 #### Shannon violins
 
     ## Warning in max(data$density): no non-missing arguments to max; returning -
@@ -54,3 +50,16 @@ If this holds (and perhaps even if it doesn't) perhaps it's worth re-investigati
     ## Warning: Removed 3 rows containing missing values (geom_point).
 
 ![](dis_files/figure-markdown_github/singletons%201to1-1.png)
+
+Is the amount of percentile change linked to the number of elements we got from the FS?
+
+    ## Loading in data version 1.127.0
+    ## Loading in data version 1.127.0
+
+    ## Warning: Removed 3 rows containing non-finite values (stat_boxplot).
+
+![](dis_files/figure-markdown_github/percentile%20change%20v%20fs%20size-1.png)
+
+    ## Warning: Removed 3 rows containing missing values (geom_point).
+
+![](dis_files/figure-markdown_github/percentile%20change%20v%20fs%20size-2.png)![](dis_files/figure-markdown_github/percentile%20change%20v%20fs%20size-3.png)![](dis_files/figure-markdown_github/percentile%20change%20v%20fs%20size-4.png)
