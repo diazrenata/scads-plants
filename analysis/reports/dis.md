@@ -63,3 +63,17 @@ Is the amount of percentile change linked to the number of elements we got from 
     ## Warning: Removed 3 rows containing missing values (geom_point).
 
 ![](dis_files/figure-markdown_github/percentile%20change%20v%20fs%20size-2.png)![](dis_files/figure-markdown_github/percentile%20change%20v%20fs%20size-3.png)![](dis_files/figure-markdown_github/percentile%20change%20v%20fs%20size-4.png)
+
+    ## Warning: Removed 3 rows containing missing values (geom_point).
+
+![](dis_files/figure-markdown_github/do%20simpson%20and%20skewness%20give%20the%20same%20answers-1.png)
+
+    ## Warning: Removed 16 rows containing missing values (geom_point).
+
+![](dis_files/figure-markdown_github/do%20simpson%20and%20skewness%20give%20the%20same%20answers-2.png)
+
+    ## [1] 56
+
+    ## [1] 16
+
+There's *some* relationship, but Simpson's drives to zero much earlier than the skewness percentile gets to 100. This squares with violin plots from earlier. Simpson's is not as sensitive/nuanced as the skewness is.
