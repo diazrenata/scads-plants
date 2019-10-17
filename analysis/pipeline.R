@@ -7,10 +7,10 @@ library(scadsplants)
 #expose_imports(scadsplants)
 
 max_s <-40
-max_s_to_sample <- ceiling(1.1 * max_s)
-
+#max_s_to_sample <- ceiling(1.1 * max_s)
+max_s_to_sample <- 62
 max_n <- 15000
-max_n_to_sample <- max_n + ceiling((.1 * max_s))
+max_n_to_sample <- max_n
 
 summer <- portalr::plant_abundance(level = "Treatment", type = "Summer Annuals", plots = "All", unknowns = F, correct_sp = T, shape = "flat", min_quads = 16) %>%
   dplyr::filter(treatment == "control") %>%

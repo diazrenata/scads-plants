@@ -19,7 +19,8 @@ Imports:
     portalr,
     rmarkdown,
     tidyr,
-    magrittr
+    magrittr,
+    SPECIES
 Suggests:
     testthat
 Remotes: 

@@ -1,21 +1,35 @@
 #' Add singletons
 #'
 #' @param dat dataframe, result of get plant data
-#' @param singletons_prop Proportion of S to add as singletons. Defaults to .1. Will add `ceiling(singletons_prop * S)` species with 1 individual each.
 #'
 #' @return dataframe with some extra singletons
 #' @export
 #'
-#' @importFrom dplyr select bind_rows mutate arrange row_number
-add_singletons <- function(dat, singletons_prop = .1) {
+#' @importFrom dplyr select bind_rows mutate arrange row_number group_by n summarise filter
+#' @importFrom SPECIES chao1984 ChaoBunge ChaoLee1992
+add_singletons <- function(dat) {
+  freq = dat %>%
+    select(abund) %>%
+    group_by(abund) %>%
+    summarise(freq = n()) %>%
+    as.matrix()
 
-  true_nspp <- max(dat$rank)
-  true_nind <- sum(dat$abund)
+  est_1984 = chao1984(freq)$Nhat
+  cb = ChaoBunge(freq)$Nhat
+  clee = mean(ChaoLee1992(freq)$Nhat)
 
-  new_nspp <- ceiling(true_nspp * (1 + singletons_prop))
+  true_nspp <- nrow(dat)
+
+  ests <- data.frame(est = c(est_1984, cb, clee)) %>%
+    filter(!is.na(est),
+           !is.nan(est),
+           !is.infinite(est),
+           est > 0)
+
+  est_nspp <- ceiling(mean(ests$est))
 
   newdat <- data.frame(
-    abund = rep(1, times = new_nspp - true_nspp)
+    abund = rep(1, times = est_nspp - true_nspp)
   )
 
   dat <- dat %>%

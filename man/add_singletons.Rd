@@ -4,12 +4,10 @@
 \alias{add_singletons}
 \title{Add singletons}
 \usage{
-add_singletons(dat, singletons_prop = 0.1)
+add_singletons(dat)
 }
 \arguments{
 \item{dat}{dataframe, result of get plant data}
-
-\item{singletons_prop}{Proportion of S to add as singletons. Defaults to .1. Will add \code{ceiling(singletons_prop * S)} species with 1 individual each.}
 }
 \value{
 dataframe with some extra singletons
