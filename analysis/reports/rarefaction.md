@@ -4,82 +4,12 @@ Rarefaction/estimated richness report
 Developing a rarefaction protocol
 ---------------------------------
 
-    ## Warnings: the t that defines the abundant/rare species must be smaller than number of rows in your data matrix n! 
-    ##           We use t= 3 in this calculation! 
-    ## 
-    ## Warnings: the t that defines the abundant/rare species must be smaller than number of rows in your data matrix n! 
-    ##           We use t= 3 in this calculation! 
-    ## 
-    ## Warnings: the t that defines the abundant/rare species must be smaller than number of rows in your data matrix n! 
-    ##           We use t= 6 in this calculation! 
-    ## 
-    ## Warnings: the t that defines the abundant/rare species must be smaller than number of rows in your data matrix n! 
-    ##           We use t= 6 in this calculation! 
-    ## 
-    ## Warnings: the t that defines the abundant/rare species must be smaller than number of rows in your data matrix n! 
-    ##           We use t= 9 in this calculation! 
-    ## 
-    ## Warnings: the t that defines the abundant/rare species must be smaller than number of rows in your data matrix n! 
-    ##           We use t= 9 in this calculation! 
-    ## 
-    ## Warnings: the t that defines the abundant/rare species must be smaller than number of rows in your data matrix n! 
-    ##           We use t= 2 in this calculation! 
-    ## 
-    ## Warnings: the t that defines the abundant/rare species must be smaller than number of rows in your data matrix n! 
-    ##           We use t= 2 in this calculation! 
-    ## 
-    ## Warnings: the t that defines the abundant/rare species must be smaller than number of rows in your data matrix n! 
-    ##           We use t= 4 in this calculation! 
-    ## 
-    ## Warnings: the t that defines the abundant/rare species must be smaller than number of rows in your data matrix n! 
-    ##           We use t= 4 in this calculation! 
-    ## 
-    ## Warnings: the t that defines the abundant/rare species must be smaller than number of rows in your data matrix n! 
-    ##           We use t= 7 in this calculation! 
-    ## 
-    ## Warnings: the t that defines the abundant/rare species must be smaller than number of rows in your data matrix n! 
-    ##           We use t= 7 in this calculation! 
-    ## 
-    ## Warnings: the t that defines the abundant/rare species must be smaller than number of rows in your data matrix n! 
-    ##           We use t= 1 in this calculation! 
-    ## 
-    ## Warnings: the t that defines the abundant/rare species must be smaller than number of rows in your data matrix n! 
-    ##           We use t= 1 in this calculation! 
-    ## 
-    ## Warnings: the t that defines the abundant/rare species must be smaller than number of rows in your data matrix n! 
-    ##           We use t= 2 in this calculation! 
-    ## 
-    ## Warnings: the t that defines the abundant/rare species must be smaller than number of rows in your data matrix n! 
-    ##           We use t= 2 in this calculation! 
-    ## 
-    ## Warnings: the t that defines the abundant/rare species must be smaller than number of rows in your data matrix n! 
-    ##           We use t= 4 in this calculation! 
-    ## 
-    ## Warnings: the t that defines the abundant/rare species must be smaller than number of rows in your data matrix n! 
-    ##           We use t= 4 in this calculation! 
-    ## 
-    ## Warnings: the t that defines the abundant/rare species must be smaller than number of rows in your data matrix n! 
-    ##           We use t= 4 in this calculation! 
-    ## 
-    ## Warnings: the t that defines the abundant/rare species must be smaller than number of rows in your data matrix n! 
-    ##           We use t= 4 in this calculation! 
-    ## 
-    ## Warnings: the t that defines the abundant/rare species must be smaller than number of rows in your data matrix n! 
-    ##           We use t= 2 in this calculation! 
-    ## 
-    ## Warnings: the t that defines the abundant/rare species must be smaller than number of rows in your data matrix n! 
-    ##           We use t= 2 in this calculation! 
-    ## 
-    ## Warnings: the t that defines the abundant/rare species must be smaller than number of rows in your data matrix n! 
-    ##           We use t= 7 in this calculation! 
-    ## 
-    ## Warnings: the t that defines the abundant/rare species must be smaller than number of rows in your data matrix n! 
-    ##           We use t= 7 in this calculation! 
-    ## 
-    ## Warnings: the t that defines the abundant/rare species must be smaller than number of rows in your data matrix n! 
-    ##           We use t= 7 in this calculation! 
-    ## 
-    ## Warnings: the t that defines the abundant/rare species must be smaller than number of rows in your data matrix n! 
-    ##           We use t= 7 in this calculation!
-
 ![](rarefaction_files/figure-markdown_github/rarefaction-1.png)![](rarefaction_files/figure-markdown_github/rarefaction-2.png)
+
+    ## [1] 62
+
+    ## [1] 13102
+
+The consensus from the various estimators looks like the 10% I initially added was conservative.
+
+![](rarefaction_files/figure-markdown_github/plot%20singleton%20v%20raw-1.png)

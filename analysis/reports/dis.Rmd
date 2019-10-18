@@ -95,7 +95,7 @@ simpson_violins
 # 
 # ranked_di_long <- ranked_di_df %>%
 #   tidyr::gather(-sim, -year, -season, -treatment, -source, -di_name, -singletons, key = "variable", value = "value")
-
+# 
 
 load(here::here("analysis", "reports", "ranked_dis.Rds"))
 

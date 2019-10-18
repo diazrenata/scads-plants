@@ -33,17 +33,19 @@ all_freqs <- lapply(all_dats, FUN = function(dat_df) return(list(freq = dat_df %
                                                                  meta = data.frame(year = dat_df$year[1],
                                                                                    season = dat_df$season[1], stringsAsFactors = F))))
 
+rm(all_dats)
+rm(datnames)
 ```
 
-```{r rarefaction, fig.height = 5, fig.width = 10, warning = FALSE, message = FALSE}
+```{r rarefaction, fig.height = 3, fig.width = 6, warning = FALSE, message = FALSE}
 all_ests <- lapply(all_freqs, FUN = function(freq_list)
   return(freq_list$meta %>%
            mutate(S = sum(freq_list$freq[,2]),
                   N = sum(freq_list$freq[,1] * freq_list$freq[,2]),
-                  est_1984 = chao1984(freq_list$freq)$Nhat,
-                  cb = ChaoBunge(freq_list$freq)$Nhat,
-                  clee = mean(ChaoLee1992(freq_list$freq)$Nhat)
-            )))
+                  est_1984 = ifelse(sum(freq_list$freq[,2] > 2), chao1984(freq_list$freq)$Nhat, NA),
+                  cb = ifelse(sum(freq_list$freq[,2] > 2), ChaoBunge(freq_list$freq, t = min(11, nrow(freq_list$freq) -1 ))$Nhat, NA),
+                  clee = ifelse(sum(freq_list$freq[,2] > 2), mean(ChaoLee1992(freq_list$freq, t = min(11, nrow(freq_list$freq) - 1))$Nhat), NA)
+           )))
 
 all_ests <- bind_rows(all_ests)
 
@@ -77,6 +79,8 @@ ests_mean_plots <- ggplot(data = all_ests, aes(x = S, y = mean_est)) +
   ylim(0, max(all_ests$mean_est, na.rm = T) + 5)
 
 ests_mean_plots
+rm(all_freqs)
+
 ```
 
 ```{r estimated statevars}
@@ -91,4 +95,38 @@ max(statevars$est_N)
 
 ```
 
-The consensus from the various estimators looks like the 10% I initiallly added was conservative. 
+The consensus from the various estimators looks like the 10% I initially added was conservative. 
+
+```{r load sims}
+
+load(here::here("analysis", "reports", "ranked_dis.Rds"))
+fs_df <- read.csv(here::here("analysis", "drake", "fs_df.csv"), stringsAsFactors = F)
+
+fs_df <- fs_df %>%
+  filter(source == "observed") %>%
+  group_by(fs_name, sim, season, year) %>%
+  mutate(S = n(), 
+         N = sum(abund)) %>%
+  ungroup()
+
+ranked_di_df <- ranked_di_df %>%
+  filter(source == "observed") %>%
+  select(-sim) %>%
+  mutate(fs_name = substr(di_name, 4, nchar(di_name))) %>%
+  left_join(fs_df, by = c("fs_name", "source", "season", "year", "treatment"))
+
+ranked_di_long_fs <- ranked_di_df %>%
+  select(-skew, -shannon, -simpson, -fs_name, -di_name, -sim, -treatment) %>%
+  tidyr::gather(-source, -season, -singletons, -S, -N, -abund, -year, -rank, key = "variable", value = "value")
+```
+
+```{r plot singleton v raw, fig.height= 100, fig.width = 7}
+
+rare_plots <- ggplot(data = ranked_di_long_fs, aes(x = rank, y = abund, group = singletons, color = value)) +
+  geom_line() + 
+  theme_bw() +
+  facet_wrap(vars(year, season, variable), strip.position = "top", scales = "free", ncol = 3) +
+  scale_color_viridis_c(end = .8, option = "plasma")
+
+rare_plots
+```
