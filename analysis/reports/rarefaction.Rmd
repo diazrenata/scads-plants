@@ -25,6 +25,13 @@ datnames <- datnames[ !grepl(datnames, pattern = "singles")]
 
 all_dats <- lapply(datnames, readd, cache = cache, character_only = T)
 
+all_singletons <- lapply(all_dats, FUN = function(dat) return(try(add_singletons(dat)))) 
+
+all_est_S <- lapply(all_singletons, FUN = function(dat)
+  return(try(nrow(dat)))) 
+
+head(all_dats[[3]])
+
 all_freqs <- lapply(all_dats, FUN = function(dat_df) return(list(freq = dat_df %>%
                                                                    select(abund) %>%
                                                                    group_by(abund) %>%
@@ -33,8 +40,6 @@ all_freqs <- lapply(all_dats, FUN = function(dat_df) return(list(freq = dat_df %
                                                                  meta = data.frame(year = dat_df$year[1],
                                                                                    season = dat_df$season[1], stringsAsFactors = F))))
 
-rm(all_dats)
-rm(datnames)
 ```
 
 ```{r rarefaction, fig.height = 3, fig.width = 6, warning = FALSE, message = FALSE}
@@ -75,11 +80,9 @@ ests_mean_plots <- ggplot(data = all_ests, aes(x = S, y = mean_est)) +
   geom_abline(intercept = 0, slope = 1) +
   geom_abline(intercept = 0, slope = 1.1, color = "blue") +
   theme_bw() +
-  facet_wrap(vars(season), ncol = 2, strip.position = "top") +
   ylim(0, max(all_ests$mean_est, na.rm = T) + 5)
 
 ests_mean_plots
-rm(all_freqs)
 
 ```
 
@@ -93,6 +96,26 @@ statevars <- all_ests %>%
 max(statevars$mean_est)
 max(statevars$est_N)
 
+function_statevars <- bind_rows(all_dats, .id= 'datname') %>%
+  select(datname, season, year, rank) %>%
+  group_by(datname, season, year) %>%
+  summarize(S = max(rank)) %>%
+  ungroup() %>%
+  mutate(S_est = NA, datname = as.integer(datname)) %>%
+  arrange(datname)
+
+for(i in 1:nrow(function_statevars)) {
+  if(is.integer(all_est_S[[i]])) {
+    function_statevars$S_est[i] <- all_est_S[[i]]
+  }
+}
+
+function_S <- ggplot(data = function_statevars, aes(x = S, y = S_est)) +
+  geom_point() +
+  theme_bw() +
+  geom_abline(intercept = 0, slope = 1) +
+  geom_abline(intercept = 0, slope = 1.1, color = "blue")
+function_S
 ```
 
 The consensus from the various estimators looks like the 10% I initially added was conservative. 
@@ -129,4 +152,56 @@ rare_plots <- ggplot(data = ranked_di_long_fs, aes(x = rank, y = abund, group = 
   scale_color_viridis_c(end = .8, option = "plasma")
 
 rare_plots
+```
+
+```{r s s}
+
+di_change_df <- ranked_di_df %>%
+  select(-di_name, -fs_name, -sim, -abund, -rank, -source, -treatment, -skew, -shannon, -simpson) %>%
+  distinct()
+
+di_change_df <- di_change_df %>%
+  filter(singletons == "true") %>%
+  select(-singletons) %>%
+  left_join(
+    select(
+      filter(di_change_df, singletons != "true"), -singletons
+    ), by = c("year", "season")
+  ) %>%
+  mutate(dS = S.y - S.x,
+         dN = N.y - N.x,
+         dskew_percentile = skew_percentile.y - skew_percentile.x,
+         dshannon_percentile = shannon_percentile.y - shannon_percentile.x,
+         dsimpson_percentile = simpson_percentile.y - simpson_percentile.x
+         ) %>%
+  mutate(dS_percent = dS/S.x)
+
+dS_dskew <- ggplot(data = di_change_df, aes(x = S.x, y = dS_percent, color = dskew_percentile)) +
+  geom_point() +
+  theme_bw() +
+  scale_color_viridis_c(end = .8)
+
+dS_dskew
+```
+
+```{r why is 1998 wrong}
+loadd(fs_dat_singles_dat_1998L_summer_control_10000_master_p_table, cache = cache)
+fs_98 <- fs_dat_singles_dat_1998L_summer_control_10000_master_p_table %>%
+  group_by(sim) %>%
+  summarize(Nspp = n()) %>%
+  ungroup()
+
+head(fs_98)
+
+
+
+loadd(dat_singles_dat_1998L_summer_control, cache = cache)
+
+nrow(dat_singles_dat_1998L_summer_control)
+dat_singles_dat_1998L_summer_control
+
+loadd(dat_1998L_summer_control, cache = cache)
+
+add_singletons(dat_singles_dat_1998L_summer_control)
+
 ```
