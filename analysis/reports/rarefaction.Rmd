@@ -23,79 +23,52 @@ cache <- storr::storr_dbi("datatable", "keystable", db)
 datnames <- cached(cache = cache)[ which(substr(cached(cache = cache), 1, 3) == "dat")]
 datnames <- datnames[ !grepl(datnames, pattern = "singles")]
 
+dat <- readd(datnames[2], character_only = T,  cache = cache)
+
 all_dats <- lapply(datnames, readd, cache = cache, character_only = T)
 
-all_freqs <- lapply(all_dats, FUN = function(dat_df) return(list(freq = dat_df %>%
-                                                                   select(abund) %>%
-                                                                   group_by(abund) %>%
-                                                                   summarise(freq = n()) %>%
-                                                                   as.matrix(),
-                                                                 meta = data.frame(year = dat_df$year[1],
-                                                                                   season = dat_df$season[1], stringsAsFactors = F))))
+all_ests <- lapply(all_dats, FUN = function(a_dat) return(try(add_singletons(a_dat))))
 
-rm(all_dats)
-rm(datnames)
+all_ests <- all_ests[ which(!is.na(all_ests))]
+
+alldat <- bind_rows(all_dats)
+allests <- bind_rows(all_ests)
+
+allests <- allests %>%
+  group_by(sim, source, season, year, treatment) %>%
+  summarize(n0 = sum(abund),
+         s0 = n()) %>%
+  ungroup() %>%
+  select(season, year, s0, n0) %>%
+  rename(est_n0 = n0,
+         est_s0 = s0)
+
+alldat <- alldat %>%
+  group_by(sim, source, season, year, treatment) %>%
+  summarize(n0 = sum(abund),
+         s0 = n()) %>%
+  ungroup() %>%
+  select(season, year, s0, n0)
+
+alldat <- left_join(alldat, allests, by = c("season", "year"))
+
 ```
 
 ```{r rarefaction, fig.height = 3, fig.width = 6, warning = FALSE, message = FALSE}
-all_ests <- lapply(all_freqs, FUN = function(freq_list)
-  return(freq_list$meta %>%
-           mutate(S = sum(freq_list$freq[,2]),
-                  N = sum(freq_list$freq[,1] * freq_list$freq[,2]),
-                  est_1984 = ifelse(sum(freq_list$freq[,2] > 2), chao1984(freq_list$freq)$Nhat, NA),
-                  cb = ifelse(sum(freq_list$freq[,2] > 2), ChaoBunge(freq_list$freq, t = min(11, nrow(freq_list$freq) -1 ))$Nhat, NA),
-                  clee = ifelse(sum(freq_list$freq[,2] > 2), mean(ChaoLee1992(freq_list$freq, t = min(11, nrow(freq_list$freq) - 1))$Nhat), NA)
-           )))
 
-all_ests <- bind_rows(all_ests)
-
-all_ests <- all_ests %>%
-  tidyr::gather(-year, -season, -S, -N, key = "estimator", value = "estimate")  %>%
-  filter(!is.infinite(estimate),
-         !is.na(estimate),
-         !is.nan(estimate),
-         estimate > 0) %>%
-  group_by(year, season) %>%
-  mutate(mean_est = mean(estimate)) %>%
-  ungroup()
-
-ests_plots <- ggplot(data = all_ests, aes(x = S, y = estimate, color = estimator)) +
+ests_plots <- ggplot(data = alldat, aes(x = s0, y = est_s0)) +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) +
   geom_abline(intercept = 0, slope = 1.1, color = "blue") +
   theme_bw() +
   facet_wrap(vars(season), ncol = 2, strip.position = "top") +
-  ylim(0, max(all_ests$estimate, na.rm = T) + 5) +
-  scale_color_viridis_d(end = .8)
+  ylim(0, max(alldat$est_s0, na.rm = T) + 5)
 
 ests_plots
 
-ests_mean_plots <- ggplot(data = all_ests, aes(x = S, y = mean_est)) +
-  geom_point() +
-  geom_abline(intercept = 0, slope = 1) +
-  geom_abline(intercept = 0, slope = 1.1, color = "blue") +
-  theme_bw() +
-  facet_wrap(vars(season), ncol = 2, strip.position = "top") +
-  ylim(0, max(all_ests$mean_est, na.rm = T) + 5)
-
-ests_mean_plots
-rm(all_freqs)
-
+max(alldat$est_s0, na.rm = T)
 ```
 
-```{r estimated statevars}
-
-statevars <- all_ests %>%
-  select(S, N, mean_est) %>%
-  mutate(mean_est = ceiling(mean_est)) %>%
-  mutate(est_N = N + (mean_est - S) + 1)
-
-max(statevars$mean_est)
-max(statevars$est_N)
-
-```
-
-The consensus from the various estimators looks like the 10% I initially added was conservative. 
 
 ```{r load sims}
 

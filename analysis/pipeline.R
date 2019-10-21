@@ -4,7 +4,7 @@ library(feasiblesads)
 library(scadsplants)
 
 #expose_imports(scads)
-#expose_imports(scadsplants)
+expose_imports(scadsplants)
 
 max_s <-40
 #max_s_to_sample <- ceiling(1.1 * max_s)

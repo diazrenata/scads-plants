@@ -37,6 +37,10 @@ build_p_table <- function(list_of_datasets) {
 #' @importFrom feasiblesads fill_ps sample_fs
 sample_fs_long <- function(dataset, nsamples, p_table = NULL) {
 
+  if(is.na(dataset)) {
+    return(NA)
+  }
+
   max_s = max(dataset$rank)
   max_n = sum(dataset$abund)
 
