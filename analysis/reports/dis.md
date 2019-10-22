@@ -8,10 +8,7 @@ Diversity index report
     ## Warning in max(data$density): no non-missing arguments to max; returning -
     ## Inf
 
-    ## Warning in max(data$density): no non-missing arguments to max; returning -
-    ## Inf
-
-    ## Warning: Removed 1 rows containing missing values (geom_point).
+    ## Warning: Removed 2 rows containing missing values (geom_point).
 
 ![](dis_files/figure-markdown_github/dist%20of%20skew-1.png)
 
@@ -47,7 +44,7 @@ Diversity index report
 
 ### Sensitivity of percentile to adding singletons
 
-    ## Warning: Removed 3 rows containing missing values (geom_point).
+    ## Warning: Removed 22 rows containing missing values (geom_point).
 
 ![](dis_files/figure-markdown_github/singletons%201to1-1.png)
 
@@ -56,11 +53,11 @@ Is the amount of percentile change linked to the number of elements we got from 
     ## Loading in data version 1.127.0
     ## Loading in data version 1.127.0
 
-    ## Warning: Removed 3 rows containing non-finite values (stat_boxplot).
+    ## Warning: Removed 22 rows containing non-finite values (stat_boxplot).
 
 ![](dis_files/figure-markdown_github/percentile%20change%20v%20fs%20size-1.png)
 
-    ## Warning: Removed 3 rows containing missing values (geom_point).
+    ## Warning: Removed 22 rows containing missing values (geom_point).
 
 ![](dis_files/figure-markdown_github/percentile%20change%20v%20fs%20size-2.png)![](dis_files/figure-markdown_github/percentile%20change%20v%20fs%20size-3.png)![](dis_files/figure-markdown_github/percentile%20change%20v%20fs%20size-4.png)
 
@@ -68,12 +65,14 @@ Is the amount of percentile change linked to the number of elements we got from 
 
 ![](dis_files/figure-markdown_github/do%20simpson%20and%20skewness%20give%20the%20same%20answers-1.png)
 
-    ## Warning: Removed 16 rows containing missing values (geom_point).
+    ## Warning: Removed 12 rows containing missing values (geom_point).
 
 ![](dis_files/figure-markdown_github/do%20simpson%20and%20skewness%20give%20the%20same%20answers-2.png)
 
-    ## [1] 56
+    ## [1] 54
 
-    ## [1] 16
+    ## [1] 14
 
 There's *some* relationship, but Simpson's drives to zero much earlier than the skewness percentile gets to 100. This squares with violin plots from earlier. Simpson's is not as sensitive/nuanced as the skewness is.
+
+![](dis_files/figure-markdown_github/do%20simpsons%20and%20skew%20give%20QUALITATIVELY%20same%20conclusions-1.png) Green is outliers. The Simpson *non-*outliers are a subset of the skew *non*-outliers. Distinguishing between a 5% threshold and a 2.5% threshold for outliers (valuely one-sided v two-sided - but these are always one-sided) only changes one point.
