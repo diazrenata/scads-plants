@@ -42,37 +42,38 @@ Diversity index report
 
 ![](dis_files/figure-markdown_github/skewness%20percentile%20hist-1.png)
 
-### Sensitivity of percentile to adding singletons
-
-    ## Warning: Removed 22 rows containing missing values (geom_point).
-
-![](dis_files/figure-markdown_github/singletons%201to1-1.png)
-
-Is the amount of percentile change linked to the number of elements we got from the FS?
-
-    ## Loading in data version 1.127.0
-    ## Loading in data version 1.127.0
-
-    ## Warning: Removed 22 rows containing non-finite values (stat_boxplot).
-
-![](dis_files/figure-markdown_github/percentile%20change%20v%20fs%20size-1.png)
-
-    ## Warning: Removed 22 rows containing missing values (geom_point).
-
-![](dis_files/figure-markdown_github/percentile%20change%20v%20fs%20size-2.png)![](dis_files/figure-markdown_github/percentile%20change%20v%20fs%20size-3.png)![](dis_files/figure-markdown_github/percentile%20change%20v%20fs%20size-4.png)
+Simpson's vs. skewness percentile values
+----------------------------------------
 
     ## Warning: Removed 3 rows containing missing values (geom_point).
 
 ![](dis_files/figure-markdown_github/do%20simpson%20and%20skewness%20give%20the%20same%20answers-1.png)
 
+#### Zoomed to the very weirdest
+
+    ## Scale for 'x' is already present. Adding another scale for 'x', which
+    ## will replace the existing scale.
+
+    ## Scale for 'y' is already present. Adding another scale for 'y', which
+    ## will replace the existing scale.
+
     ## Warning: Removed 12 rows containing missing values (geom_point).
 
-![](dis_files/figure-markdown_github/do%20simpson%20and%20skewness%20give%20the%20same%20answers-2.png)
+![](dis_files/figure-markdown_github/simp%20skew%20zoomed-1.png)
+
+    ## [1] "How often is the Simpson percentile 0?"
 
     ## [1] 54
 
+    ## [1] "How often is the skew percentile 100?"
+
     ## [1] 14
 
-There's *some* relationship, but Simpson's drives to zero much earlier than the skewness percentile gets to 100. This squares with violin plots from earlier. Simpson's is not as sensitive/nuanced as the skewness is.
+There's *some* relationship, but Simpson's drives to zero much earlier than the skewness percentile gets to 100. This squares with violin plots from earlier. Simpson's is more sensitive/less nuanced than skewness.
 
-![](dis_files/figure-markdown_github/do%20simpsons%20and%20skew%20give%20QUALITATIVELY%20same%20conclusions-1.png) Green is outliers. The Simpson *non-*outliers are a subset of the skew *non*-outliers. Distinguishing between a 5% threshold and a 2.5% threshold for outliers (valuely one-sided v two-sided - but these are always one-sided) only changes one point.
+Would our conclusions change using Simpson's vs. skewness?
+----------------------------------------------------------
+
+![](dis_files/figure-markdown_github/do%20simpsons%20and%20skew%20give%20QUALITATIVELY%20same%20conclusions-1.png)
+
+Orange is outliers. The Simpson *non-*outliers are a subset of the skew *non*-outliers. Distinguishing between a 5% threshold and a 2.5% threshold for outliers (vaguely one-sided v two-sided - but these are always one-sided) only changes one point.

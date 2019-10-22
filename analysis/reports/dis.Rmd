@@ -112,7 +112,7 @@ di_hists
 
 ```
 
-
+## Simpson's vs. skewness percentile values
 ```{r do simpson and skewness give the same answers}
 
 simp_skew <- ranked_di_df %>%
@@ -126,23 +126,32 @@ simp_skew_percentile_plot <- ggplot(data = simp_skew, aes(x = skew_percentile, y
   geom_point() +
   geom_abline(slope = -1, intercept = 100) +
   theme_bw() +
-  scale_color_viridis_d(end = .8)
+  scale_color_viridis_d(end = .8) +
+  ylim(0, 100) +
+  xlim(0, 100)
 
 simp_skew_percentile_plot
+```
 
+#### Zoomed to the very weirdest
+```{r simp skew zoomed}
 simp_skew_percentile_plot_zoomed <- simp_skew_percentile_plot +
   xlim(80, 100) +
   ylim(0, 20)
 
 simp_skew_percentile_plot_zoomed
 
+print("How often is the Simpson percentile 0?")
 sum(simp_skew$simpson_percentile == 0)
+print("How often is the skew percentile 100?")
 sum(simp_skew$skew_percentile == 100, na.rm = T)
 ```
 
-There's _some_ relationship, but Simpson's drives to zero much earlier than the skewness percentile gets to 100. This squares with violin plots from earlier. Simpson's is not as sensitive/nuanced as the skewness is. 
+There's _some_ relationship, but Simpson's drives to zero much earlier than the skewness percentile gets to 100. This squares with violin plots from earlier. Simpson's is more sensitive/less nuanced than skewness. 
 
-```{r do simpsons and skew give QUALITATIVELY same conclusions}
+
+## Would our conclusions change using Simpson's vs. skewness?
+```{r do simpsons and skew give QUALITATIVELY same conclusions, fig.width = 10, fig.height = 5}
 
 conclusions <- ranked_di_df %>%
   filter(source == "observed", singletons == "true") %>%
@@ -152,16 +161,20 @@ conclusions <- ranked_di_df %>%
          skew_outlier_95 = skew_percentile >= 97.5) %>%
   select(season, year, simp_outlier_2p5, skew_outlier_97p5, simp_outlier_5, skew_outlier_95, skew_percentile, simpson_percentile) %>%
   tidyr::gather(-season, -year, key = "variable", value = "value") %>%
-  mutate(value = as.logical(value))
+  mutate(value = as.logical(value)) %>%
+  mutate(variable = as.factor(variable)) %>%
+  mutate(variable = factor(variable, levels = levels(variable)[c(1, 2, 5, 4,3, 6)]))
 
 
 conclusions_plot <- ggplot(data = filter(conclusions, grepl(variable, pattern = "outlier"), !is.na(value)), aes(x = year, y = season, color = value)) +
   geom_point() +
-  scale_color_viridis_d(end = .8) +
-  facet_wrap(vars(variable), nrow = 4) + 
+  scale_color_viridis_d(option = "magma", end = .8) +
+  facet_wrap(vars(variable), nrow = 2, dir = "h") + 
   theme_bw()
 conclusions_plot
 
 ```
-Green is outliers. The Simpson *non-*outliers are a subset of the skew *non*-outliers. Distinguishing between a 5% threshold and a 2.5% threshold for outliers (valuely one-sided v two-sided - but these are always one-sided) only changes one point.
+
+
+Orange is outliers. The Simpson *non-*outliers are a subset of the skew *non*-outliers. Distinguishing between a 5% threshold and a 2.5% threshold for outliers (vaguely one-sided v two-sided - but these are always one-sided) only changes one point.
 
