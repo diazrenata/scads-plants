@@ -14,11 +14,14 @@ add_singletons <- function(dat) {
     summarise(freq = n()) %>%
     as.matrix()
 
-  est_1984 = chao1984(freq)$Nhat
-  cb = ChaoBunge(freq)$Nhat
-  clee = mean(ChaoLee1992(freq)$Nhat)
+  s0 <- sum(freq[,2])
+  n0 <- sum(freq[,1])
 
-  true_nspp <- nrow(dat)
+  t <- min(nrow(freq), 10)
+
+  est_1984 = chao1984(freq)$Nhat
+  cb = ChaoBunge(freq, t = t)$Nhat
+  clee = mean(ChaoLee1992(freq, t = t)$Nhat, na.rm = T)
 
   ests <- data.frame(est = c(est_1984, cb, clee)) %>%
     filter(!is.na(est),
@@ -26,10 +29,14 @@ add_singletons <- function(dat) {
            !is.infinite(est),
            est > 0)
 
+  if(nrow(ests) == 0) {
+    return(NA)
+  }
+
   est_nspp <- ceiling(mean(ests$est))
 
   newdat <- data.frame(
-    abund = rep(1, times = est_nspp - true_nspp)
+    abund = rep(1, times = est_nspp - s0)
   )
 
   dat <- dat %>%
