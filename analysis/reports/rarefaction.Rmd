@@ -54,6 +54,10 @@ alldat <- left_join(alldat, allests, by = c("season", "year"))
 
 ```
 
+The x-axis is the actual number of species and the y-axis is the mean of 3 estimators (`chao1984`, `ChaoBunge`, `ChaoLee1992` from `SPECIES`). The black line is the 1:1 line and the blue line is the 1:1.1 line, which represents the 10% I initially added. This is often sufficient but also often conservative. 
+
+Very small communities break the estimators and have been removed. (I think S must be >3?)
+
 ```{r rarefaction, fig.height = 3, fig.width = 6, warning = FALSE, message = FALSE}
 
 ests_plots <- ggplot(data = alldat, aes(x = s0, y = est_s0)) +
@@ -66,8 +70,6 @@ ests_plots <- ggplot(data = alldat, aes(x = s0, y = est_s0)) +
 
 ests_plots
 
-max(alldat$est_s0, na.rm = T)
-
 est_datnames <- cached(cache = cache)[ which(substr(cached(cache = cache), 1, 3) == "dat")]
 est_datnames <- est_datnames[ grepl(est_datnames, pattern = "singles")]
 
@@ -79,7 +81,6 @@ all_est_cached <- all_est_cached[ which(!is.na(all_est_cached))]
 
 all_est_cached <- bind_rows(all_est_cached, .id = "est_datname")
 
-head(all_est_cached)
 
 est_statevars <- all_est_cached %>%
   select(season, year, sim, rank, abund, est_datname) %>%
@@ -95,59 +96,42 @@ alldat <- alldat %>%
 alldat <- alldat %>%
   mutate(s0_match = est_s0 == cache_s0,
          n0_match = est_n0 == cache_n0)
-
-sum(alldat$s0_match, na.rm = T)
-sum(alldat$n0_match, na.rm = T)
-
-sum(is.na(alldat$s0_match))
+# 
+# sum(alldat$s0_match, na.rm = T)
+# sum(alldat$n0_match, na.rm = T)
+# 
+# sum(is.na(alldat$s0_match))
 
 DBI::dbDisconnect(db)
-rm(list=ls())
 
-function_statevars <- bind_rows(all_dats, .id= 'datname') %>%
-  select(datname, season, year, rank) %>%
-  group_by(datname, season, year) %>%
-  summarize(S = max(rank)) %>%
-  ungroup() %>%
-  mutate(S_est = NA, datname = as.integer(datname)) %>%
-  arrange(datname)
-
-for(i in 1:nrow(function_statevars)) {
-  if(is.integer(all_est_S[[i]])) {
-    function_statevars$S_est[i] <- all_est_S[[i]]
-  }
-}
-
-function_S <- ggplot(data = function_statevars, aes(x = S, y = S_est)) +
-  geom_point() +
-  theme_bw() +
-  geom_abline(intercept = 0, slope = 1) +
-  geom_abline(intercept = 0, slope = 1.1, color = "blue")
-function_S
 ```
 
 
 ```{r load sims}
 
 load(here::here("analysis", "reports", "ranked_dis.Rds"))
-fs_df <- read.csv(here::here("analysis", "drake", "fs_df.csv"), stringsAsFactors = F)
 
-fs_df <- fs_df %>%
-  filter(source == "observed") %>%
-  group_by(fs_name, sim, season, year) %>%
-  mutate(S = n(), 
-         N = sum(abund)) %>%
-  ungroup()
+alldat_statevars <- alldat %>%
+  select(season, year, s0, n0, cache_s0, cache_n0)
+
+alldat_statevars_singletons <- alldat_statevars %>%
+  select(-s0, -n0) %>%
+  mutate(singletons = "singletons") %>%
+  rename(S = cache_s0, N = cache_n0)
+
+alldat_statevars <- alldat_statevars %>%
+  select(-cache_s0, -cache_n0) %>%
+  mutate(singletons = "true") %>%
+  rename(S= s0, N = n0)
+
+alldat_statevars <- bind_rows(alldat_statevars, alldat_statevars_singletons)
 
 ranked_di_df <- ranked_di_df %>%
   filter(source == "observed") %>%
   select(-sim) %>%
   mutate(fs_name = substr(di_name, 4, nchar(di_name))) %>%
-  left_join(fs_df, by = c("fs_name", "source", "season", "year", "treatment"))
+  left_join(alldat_statevars, by = c("season", "year", "singletons"))
 
-ranked_di_long_fs <- ranked_di_df %>%
-  select(-skew, -shannon, -simpson, -fs_name, -di_name, -sim, -treatment) %>%
-  tidyr::gather(-source, -season, -singletons, -S, -N, -abund, -year, -rank, key = "variable", value = "value")
 ```
 
 
@@ -168,17 +152,6 @@ sv_wide <- filter(sv, singletons == "true") %>%
 
 ```
 
-```{r plot singleton v raw, fig.height= 100, fig.width = 7}
-
-rare_plots <- ggplot(data = ranked_di_long_fs, aes(x = rank, y = abund, group = singletons, color = value)) +
-  geom_line() + 
-  theme_bw() +
-  facet_wrap(vars(year, season, variable), strip.position = "top", scales = "free", ncol = 3) +
-  scale_color_viridis_c(end = .8, option = "plasma")
-
-# rare_plots
-```
-
 
 ### Sensitivity of percentile to adding singletons
 ```{r singletons 1to1, fig.width = 4.5, fig.height = 6}
@@ -192,19 +165,8 @@ singletons_1to1_dat <- filter(ranked_di_long, source == "observed", variable %in
   select(-singletons.x, -singletons.y) %>%
   filter(!is.na(singletons_value))
 
-singletons_1to1_plot <- ggplot(data = singletons_1to1_dat, aes(x = true_value, y = singletons_value, color = season)) +
-  geom_point() +
-  geom_abline(intercept = 0, slope = 1, alpha = .5) +
-  theme_bw() +
-  facet_wrap(vars(variable, season), ncol = 2) +  
-  scale_color_viridis_d(end = .8, direction = -1)
-
-
-singletons_1to1_plot
 ```
 
-
-Is the amount of percentile change linked to the number of elements we got from the FS?
 
 
 ```{r percentile change v fs size}
@@ -217,37 +179,6 @@ fs_size_info <- di_df %>%
   summarize(n_elements = n()) %>%
   ungroup() %>%
   left_join(sv_wide, by = c("season", "year"))
-
-percentile_change <- singletons_1to1_dat %>%
-  mutate(singletons_change = singletons_value - true_value) %>%
-  mutate(abs_change = abs(singletons_change)) %>%
-  left_join(fs_size_info, by = c("season", "year", "treatment")) %>%
-  filter(!is.na(singletons_value))
-
-pc_plot <- ggplot(data = percentile_change, aes(x = season, y = singletons_change, color = season)) +
-  geom_boxplot() +
-  theme_bw() + 
-  scale_color_viridis_d(end = .8, direction = -1) +
-  facet_wrap(vars(variable), strip.pos = "top") +
-  ggtitle("Change in percentile of true vs. with singletons")
-pc_plot
-
-nel_pc <- ggplot(data = percentile_change, aes(x = n_elements, y = singletons_change, color = season)) +
-  geom_jitter() +
-  theme_bw() +
-  scale_color_viridis_d(end = .8, direction = -1) +
-  facet_wrap(vars(season, variable), scales = "fixed", strip.pos = "top") +
-  ggtitle("Change in percentile vs. number of unique draws from FS")
-nel_pc
-
-statevars_pc <- ggplot(data = percentile_change, aes(x = s_change, y = singletons_change, color = season)) +
-  geom_point() +
-  theme_bw() +
-  scale_color_viridis_d(end = .8, direction = -1) +
-  facet_wrap(vars(season, variable), strip.pos = "top") +
-  ggtitle("Percentile change vs. change in number of species")
-
-statevars_pc
 
 ```
 
@@ -275,68 +206,98 @@ singletons_conclusions <- filter(conclusions_dat, singletons == "singletons") %>
 conclusions_dat2 <- filter(conclusions_dat, singletons == "true") %>%
   select(-singletons) %>%
   left_join(singletons_conclusions, by = c("year", "season", "variable")) %>%
-  filter(!is.na(singletons_value),
-         grepl(variable, pattern = "outlier")) %>%
+  filter(!is.na(singletons_value)) %>%
   mutate(singletons_change = singletons_value != value) %>%
-  left_join(sv_wide, by = c("year", "season"))
-
-conclusions_plot <- ggplot(data = conclusions_dat2, aes(x = s_change, y = singletons_change)) +
-  geom_point() +
-  facet_wrap(vars(variable)) +
-  theme_bw()
-
-conclusions_plot
+  left_join(sv_wide, by = c("year", "season")) %>%
+  filter(s_change > 0) %>%
+  left_join(select(fs_size_info, season, year, n_elements), by = c("season", "year"))
 
 ```
 
-```{r s s}
 
-di_change_df <- ranked_di_df %>%
-  select(-di_name, -fs_name, -sim, -abund, -rank, -source, -treatment, -skew, -shannon, -simpson) %>%
-  distinct()
+This is a plot of true-value (x) vs. singletons-added (y) percentiles for skewness and Simpson's. Color corresponds to the number of species added because of the estimation. I have removed points where the estimate was equal to the actual value. The black line is the 1:1 line. 
 
-di_change_df <- di_change_df %>%
-  filter(singletons == "true") %>%
-  select(-singletons) %>%
-  left_join(
-    select(
-      filter(di_change_df, singletons != "true"), -singletons
-    ), by = c("year", "season")
-  ) %>%
-  mutate(dS = S.y - S.x,
-         dN = N.y - N.x,
-         dskew_percentile = skew_percentile.y - skew_percentile.x,
-         dshannon_percentile = shannon_percentile.y - shannon_percentile.x,
-         dsimpson_percentile = simpson_percentile.y - simpson_percentile.x
-         ) %>%
-  mutate(dS_percent = dS/S.x)
-
-dS_dskew <- ggplot(data = di_change_df, aes(x = S.x, y = dS_percent, color = dskew_percentile)) +
+```{r conclusions 1 to 1 plot}
+conclusions_1to1_plot <- ggplot(data = filter(conclusions_dat2, grepl(variable, pattern = "percentile")), aes(x = value, y = singletons_value, color = s_change)) +
   geom_point() +
+  geom_abline(intercept = 0, slope = 1, alpha  = .2) +
   theme_bw() +
-  scale_color_viridis_c(end = .8)
+  facet_wrap(vars(variable)) +
+    scale_color_viridis_c(option = "magma", begin = .3, end = .9) + ggtitle("Percentiles 1:1") +
+  xlab("Percentile from raw data") +
+  ylab("Percentile with added singletons")
 
-dS_dskew
+conclusions_1to1_plot
+
 ```
 
-```{r why is 1998 wrong}
-loadd(fs_dat_singles_dat_1998L_summer_control_10000_master_p_table, cache = cache)
-fs_98 <- fs_dat_singles_dat_1998L_summer_control_10000_master_p_table %>%
-  group_by(sim) %>%
-  summarize(Nspp = n()) %>%
-  ungroup()
+Let's zoom in on the regions of these plots where there are actually data points.
 
-head(fs_98)
+This is Simpson's. We've zoomed in to the bottom left corner. The purple guidelines are the 2.5 percentile and the blue ones are the 5 percentile. Adding singletons consistently drives the percentile value down, i.e. more extreme. It never changes whether we think the vector is "weird" to 5%, but it does push two samples from "not weird" to "weird" at 2.5%. 
+
+```{r simp 1 to 1}
+
+simpson_1to1_plot <- ggplot(data = filter(conclusions_dat2, variable == "simpson_percentile"), aes(x = value, y = singletons_value, color = s_change)) +
+  geom_point(data = filter(conclusions_dat2, n_elements > 2, variable == "simpson_percentile")) +
+  geom_point(data = filter(conclusions_dat2, n_elements < 5, variable == "simpson_percentile"), size = .8) +
+  geom_abline(intercept = 0, slope = 1, alpha = .2) +
+  geom_hline(yintercept = 2.5, color = "purple", alpha = .5) +
+  geom_hline(yintercept = 5, color = "blue", alpha = .5) +
+  geom_vline(xintercept = 2.5, color = "purple", alpha = .5) +
+  geom_vline(xintercept = 5, color = "blue", alpha = .5) +
+  ylim(0, 7) +
+  xlim(0, 7) +
+  theme_bw() +
+  scale_color_viridis_c(option = "magma", begin = .3, end = .9) +
+  ggtitle("Simpson 1:1") + 
+  xlab("Percentile from raw data") +
+  ylab("Percentile with added singletons")
+suppressWarnings(print(simpson_1to1_plot))
+```
+
+This is skewness. We've zoomed to the top right. Again, the purple lines are the 97.5, and the blue are 95. The grey is 1:1. Again, adding singletons pushes the sample to a higher, more extreme, percentile. Again, it basically doesn't change our conclusions if we use the 95% mark, but it does change our conclusions to the 97.5%. For the 97.5, two samples that are not outliers become outliers if we add singletons. 
+
+There's also one *just* on 95/97.5 line, which I'm not counting above.
+
+```{r skew 1 to 1}
+
+skew_1to1_plot <- ggplot(data = filter(conclusions_dat2, variable == "skew_percentile"), aes(x = value, y = singletons_value, color = s_change)) +
+  geom_point(data = filter(conclusions_dat2, n_elements > 2, variable == "skew_percentile")) +
+    geom_point(data = filter(conclusions_dat2, n_elements < 5, variable == "skew_percentile"), size = .8) +
+  geom_abline(intercept = 0, slope = 1, alpha = .2) +
+  geom_hline(yintercept = 97.5, color = "purple", alpha = .5) +
+  geom_hline(yintercept = 95, color = "blue", alpha = .5) +
+  geom_vline(xintercept = 97.5, color = "purple", alpha = .5) +
+  geom_vline(xintercept = 95, color = "blue", alpha = .5) +
+  ylim(93, 100) +
+  xlim(93, 100) +
+  theme_bw() +
+  scale_color_viridis_c(option = "magma", begin = .3, end = .9) +
+  ggtitle("Skewness 1:1")  +
+  xlab("Percentile from raw data") +
+  ylab("Percentile with added singletons")
+suppressWarnings(print(skew_1to1_plot))
+```
 
 
+Sometimes skewness is super small! Zooming in to the bottom left of the skewness plot, it turns out we have 1 point that is 0 and 0. This community has only 2 unique draws from the feasible set, out of 10000, so don't put a lot of stock in it. 
 
-loadd(dat_singles_dat_1998L_summer_control, cache = cache)
+```{r skewness bottom}
 
-nrow(dat_singles_dat_1998L_summer_control)
-dat_singles_dat_1998L_summer_control
 
-loadd(dat_1998L_summer_control, cache = cache)
-
-add_singletons(dat_singles_dat_1998L_summer_control)
+skew_1to1_plot_bottom <- ggplot(data = filter(conclusions_dat2, variable == "skew_percentile"), aes(x = value, y = singletons_value, color = s_change)) +
+  geom_point(data = filter(conclusions_dat2, n_elements > 2, variable == "skew_percentile")) +
+    geom_point(data = filter(conclusions_dat2, n_elements < 5, variable == "skew_percentile"), size = .8) +
+  geom_abline(intercept = 0, slope = 1, alpha = .2) +
+  geom_hline(yintercept = 2.5, color = "purple", alpha = .5) +
+  geom_hline(yintercept = 5, color = "blue", alpha = .5) +
+  geom_vline(xintercept = 2.5, color = "purple", alpha = .5) +
+  geom_vline(xintercept = 5, color = "blue", alpha = .5) +
+  ylim(0, 7) +
+  xlim(0, 7) +
+  theme_bw() +
+  scale_color_viridis_c(option = "magma", begin = .3, end = .9) +
+  ggtitle("Skewness 1:1 - low values")
+suppressWarnings(print(skew_1to1_plot_bottom))
 
 ```
