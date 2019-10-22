@@ -148,7 +148,8 @@ sv_singles <- filter(sv, singletons == "singletons") %>%
 sv_wide <- filter(sv, singletons == "true") %>%
   select(-singletons) %>%
   left_join(sv_singles, by = c("season", "year")) %>%
-  mutate(s_change = S_est - S)
+  mutate(s_change = S_est - S) %>%
+  mutate(s_change_prop = s_change / S)
 
 ```
 
@@ -218,7 +219,7 @@ conclusions_dat2 <- filter(conclusions_dat, singletons == "true") %>%
 This is a plot of true-value (x) vs. singletons-added (y) percentiles for skewness and Simpson's. Color corresponds to the number of species added because of the estimation. I have removed points where the estimate was equal to the actual value. The black line is the 1:1 line. 
 
 ```{r conclusions 1 to 1 plot}
-conclusions_1to1_plot <- ggplot(data = filter(conclusions_dat2, grepl(variable, pattern = "percentile")), aes(x = value, y = singletons_value, color = s_change)) +
+conclusions_1to1_plot <- ggplot(data = filter(conclusions_dat2, grepl(variable, pattern = "percentile")), aes(x = value, y = singletons_value, color = s_change_prop)) +
   geom_point() +
   geom_abline(intercept = 0, slope = 1, alpha  = .2) +
   theme_bw() +
@@ -237,7 +238,7 @@ This is Simpson's. We've zoomed in to the bottom left corner. The purple guideli
 
 ```{r simp 1 to 1}
 
-simpson_1to1_plot <- ggplot(data = filter(conclusions_dat2, variable == "simpson_percentile"), aes(x = value, y = singletons_value, color = s_change)) +
+simpson_1to1_plot <- ggplot(data = filter(conclusions_dat2, variable == "simpson_percentile"), aes(x = value, y = singletons_value, color = s_change_prop)) +
   geom_point(data = filter(conclusions_dat2, n_elements > 2, variable == "simpson_percentile")) +
   geom_point(data = filter(conclusions_dat2, n_elements < 5, variable == "simpson_percentile"), size = .8) +
   geom_abline(intercept = 0, slope = 1, alpha = .2) +
@@ -255,13 +256,13 @@ simpson_1to1_plot <- ggplot(data = filter(conclusions_dat2, variable == "simpson
 suppressWarnings(print(simpson_1to1_plot))
 ```
 
-This is skewness. We've zoomed to the top right. Again, the purple lines are the 97.5, and the blue are 95. The grey is 1:1. Again, adding singletons pushes the sample to a higher, more extreme, percentile. Again, it basically doesn't change our conclusions if we use the 95% mark, but it does change our conclusions to the 97.5%. For the 97.5, two samples that are not outliers become outliers if we add singletons. 
+This is skewness. We've zoomed to the top right. Again, the purple lines are the 97.5, and the blue are 95. The grey is 1:1. Again, adding singletons pushes the sample to a higher, more extreme, percentile. It basically doesn't change our conclusions if we use the 95% mark (except for the one that jumps from 80 to 97.4!), but it does change our conclusions to the 97.5%. For the 97.5, two samples that are not outliers become outliers if we add singletons. 
 
 There's also one *just* on 95/97.5 line, which I'm not counting above.
 
 ```{r skew 1 to 1}
 
-skew_1to1_plot <- ggplot(data = filter(conclusions_dat2, variable == "skew_percentile"), aes(x = value, y = singletons_value, color = s_change)) +
+skew_1to1_plot <- ggplot(data = filter(conclusions_dat2, variable == "skew_percentile"), aes(x = value, y = singletons_value, color = s_change_prop)) +
   geom_point(data = filter(conclusions_dat2, n_elements > 2, variable == "skew_percentile")) +
     geom_point(data = filter(conclusions_dat2, n_elements < 5, variable == "skew_percentile"), size = .8) +
   geom_abline(intercept = 0, slope = 1, alpha = .2) +
@@ -269,8 +270,8 @@ skew_1to1_plot <- ggplot(data = filter(conclusions_dat2, variable == "skew_perce
   geom_hline(yintercept = 95, color = "blue", alpha = .5) +
   geom_vline(xintercept = 97.5, color = "purple", alpha = .5) +
   geom_vline(xintercept = 95, color = "blue", alpha = .5) +
-  ylim(93, 100) +
-  xlim(93, 100) +
+  ylim(80, 100) +
+  xlim(80, 100) +
   theme_bw() +
   scale_color_viridis_c(option = "magma", begin = .3, end = .9) +
   ggtitle("Skewness 1:1")  +
@@ -285,7 +286,7 @@ Sometimes skewness is super small! Zooming in to the bottom left of the skewness
 ```{r skewness bottom}
 
 
-skew_1to1_plot_bottom <- ggplot(data = filter(conclusions_dat2, variable == "skew_percentile"), aes(x = value, y = singletons_value, color = s_change)) +
+skew_1to1_plot_bottom <- ggplot(data = filter(conclusions_dat2, variable == "skew_percentile"), aes(x = value, y = singletons_value, color = s_change_prop)) +
   geom_point(data = filter(conclusions_dat2, n_elements > 2, variable == "skew_percentile")) +
     geom_point(data = filter(conclusions_dat2, n_elements < 5, variable == "skew_percentile"), size = .8) +
   geom_abline(intercept = 0, slope = 1, alpha = .2) +

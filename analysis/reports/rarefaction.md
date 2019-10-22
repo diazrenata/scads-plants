@@ -24,7 +24,7 @@ This is Simpson's. We've zoomed in to the bottom left corner. The purple guideli
 
 ![](rarefaction_files/figure-markdown_github/simp%201%20to%201-1.png)
 
-This is skewness. We've zoomed to the top right. Again, the purple lines are the 97.5, and the blue are 95. The grey is 1:1. Again, adding singletons pushes the sample to a higher, more extreme, percentile. Again, it basically doesn't change our conclusions if we use the 95% mark, but it does change our conclusions to the 97.5%. For the 97.5, two samples that are not outliers become outliers if we add singletons.
+This is skewness. We've zoomed to the top right. Again, the purple lines are the 97.5, and the blue are 95. The grey is 1:1. Again, adding singletons pushes the sample to a higher, more extreme, percentile. It basically doesn't change our conclusions if we use the 95% mark (except for the one that jumps from 80 to 97.4!), but it does change our conclusions to the 97.5%. For the 97.5, two samples that are not outliers become outliers if we add singletons.
 
 There's also one *just* on 95/97.5 line, which I'm not counting above.
 
