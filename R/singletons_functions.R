@@ -6,28 +6,32 @@
 #' @export
 #'
 #' @importFrom dplyr select bind_rows mutate arrange row_number group_by n summarise filter
-#' @importFrom SPECIES chao1984 ChaoBunge ChaoLee1992
-add_singletons <- function(dat) {
+#' @importFrom vegan estimateR
+add_singletons <- function(dat, use_max =F) {
   freq = dat %>%
     select(abund) %>%
-    group_by(abund) %>%
-    summarise(freq = n()) %>%
-    as.matrix()
+    as.matrix() %>%
+    t()
 
-  s0 <- sum(freq[,2])
-  n0 <- sum(freq[,1])
+  s0 <- ncol(freq)
+  n0 <- sum(freq)
 
-  t <- min(nrow(freq), 10)
 
-  est_1984 = chao1984(freq)$Nhat
-  cb = ChaoBunge(freq, t = t)$Nhat
-  clee = mean(ChaoLee1992(freq, t = t)$Nhat, na.rm = T)
+  est <- vegan::estimateR(freq)
 
-  ests <- data.frame(est = c(est_1984, cb, clee)) %>%
+  chao_est <- est[2] - s0
+  ace_est <- est[4] - s0
+
+  if(use_max) {
+    chao_est <- chao_est + est[3]
+    ace_est <- ace_est + est[5]
+  }
+
+  ests <- data.frame(est = c(chao_est, ace_est)) %>%
     filter(!is.na(est),
            !is.nan(est),
            !is.infinite(est),
-           est > 0)
+           est >= 0)
 
   if(nrow(ests) == 0) {
     return(NA)
@@ -35,8 +39,12 @@ add_singletons <- function(dat) {
 
   est_nspp <- ceiling(mean(ests$est))
 
+  if(est_nspp == 0) {
+    return(dat)
+  }
+
   newdat <- data.frame(
-    abund = rep(1, times = est_nspp - s0)
+    abund = rep(1, times = est_nspp)
   )
 
   dat <- dat %>%

@@ -51,7 +51,7 @@ dat =target(get_plant_sad(year, season, treatment),
                             season = c("summer", "winter"),
                             treatment = "control"),
             trigger = trigger(command = FALSE)),
-dat_singles = target(add_singletons(dat),
+dat_singles = target(add_singletons(dat, use_max = TRUE),
                      transform = map(dat)),
 all_dat = target(MATSS::collect_analyses(list(dat)), transform = combine(dat)),
 all_dat_singles = target(MATSS::collect_analyses(list(dat_singles)), transform = combine(dat_singles))

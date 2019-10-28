@@ -28,11 +28,12 @@ dat <- readd(datnames[2], character_only = T,  cache = cache)
 all_dats <- lapply(datnames, readd, cache = cache, character_only = T)
 
 all_ests <- lapply(all_dats, FUN = function(a_dat) return(try(add_singletons(a_dat))))
-
+all_ests_max <- lapply(all_dats, FUN = function(a_dat) return(try(add_singletons(a_dat, use_max = TRUE))))
 all_ests <- all_ests[ which(!is.na(all_ests))]
 
 alldat <- bind_rows(all_dats)
 allests <- bind_rows(all_ests)
+allestsmax <- bind_rows(all_ests_max)
 
 allests <- allests %>%
   group_by(sim, source, season, year, treatment) %>%
@@ -43,6 +44,15 @@ allests <- allests %>%
   rename(est_n0 = n0,
          est_s0 = s0)
 
+allestsmax <- allestsmax %>%
+  group_by(sim, source, season, year, treatment) %>%
+  summarize(n0 = sum(abund),
+         s0 = n()) %>%
+  ungroup() %>%
+  select(season, year, s0, n0) %>%
+  rename(est_n0_max = n0,
+         est_s0_max = s0)
+
 alldat <- alldat %>%
   group_by(sim, source, season, year, treatment) %>%
   summarize(n0 = sum(abund),
@@ -50,7 +60,8 @@ alldat <- alldat %>%
   ungroup() %>%
   select(season, year, s0, n0)
 
-alldat <- left_join(alldat, allests, by = c("season", "year"))
+alldat <- left_join(alldat, allests, by = c("season", "year")) %>%
+  left_join(allestsmax, by = c("season", "year"))
 
 ```
 
@@ -60,13 +71,14 @@ Very small communities break the estimators and have been removed. (I think S mu
 
 ```{r rarefaction, fig.height = 3, fig.width = 6, warning = FALSE, message = FALSE}
 
-ests_plots <- ggplot(data = alldat, aes(x = s0, y = est_s0)) +
-  geom_point() +
+ests_plots <- ggplot(data = alldat, aes(x = s0, y = est_s0_max)) +
+  geom_point(aes(x = s0, y = est_s0)) +
+  geom_point(aes(x = s0, y = est_s0_max), color = "red")+
   geom_abline(intercept = 0, slope = 1) +
   geom_abline(intercept = 0, slope = 1.1, color = "blue") +
   theme_bw() +
   facet_wrap(vars(season), ncol = 2, strip.position = "top") +
-  ylim(0, max(alldat$est_s0, na.rm = T) + 5)
+  ylim(0, max(alldat$est_s0_max, na.rm = T) + 5)
 
 ests_plots
 
