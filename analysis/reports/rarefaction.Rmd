@@ -112,16 +112,18 @@ alldat <- alldat %>%
 # 
 # sum(is.na(alldat$s0_match))
 
-DBI::dbDisconnect(db)
-
 ```
 
 ```{r load sims}
 
-load(here::here("analysis", "reports", "ranked_dis.Rds"))
+loadd(di_long_df, cache = cache)
 
-alldat_statevars <- alldat %>%
-  select(season, year, s0, n0, cache_s0, cache_n0)
+di_statevars <- di_long_df %>%
+  filter(source == "observed") %>%
+  group_by(source, season, year, treatment, singletons) %>%
+  summarize(s0 = n(),
+            n0 = sum(abund)) %>%
+  ungroup()
 
 alldat_statevars_singletons <- alldat_statevars %>%
   select(-s0, -n0) %>%

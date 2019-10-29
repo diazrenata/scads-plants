@@ -40,6 +40,8 @@ add_singletons <- function(dat, use_max =F) {
   est_nspp <- ceiling(mean(ests$est))
 
   if(est_nspp == 0) {
+    dat <- dat %>%
+      dplyr::mutate(singletons = FALSE)
     return(dat)
   }
 
