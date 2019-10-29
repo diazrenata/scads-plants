@@ -104,13 +104,13 @@ alldat <- alldat %>%
   left_join(est_statevars, by = c("season", "year"))
 
 alldat <- alldat %>%
-  mutate(s0_match = est_s0 == cache_s0,
-         n0_match = est_n0 == cache_n0)
-# 
-# sum(alldat$s0_match, na.rm = T)
-# sum(alldat$n0_match, na.rm = T)
-# 
-# sum(is.na(alldat$s0_match))
+  mutate(s0_match = est_s0_max == cache_s0,
+         n0_match = est_n0_max == cache_n0)
+
+sum(alldat$s0_match, na.rm = T)
+sum(alldat$n0_match, na.rm = T)
+
+sum(is.na(alldat$s0_match))
 
 ```
 

@@ -73,8 +73,8 @@ sample_plan <- drake_plan(
   ),
   di = target(add_dis(fs),
                 transform = map(fs)),
-  fs_df = target(dplyr::bind_rows(fs, .id = "fs_name"), transform = combine(fs)),
-  di_df = target(dplyr::bind_rows(di, .id = "di_name"), transform = combine(di)),
+  fs_df = target(dplyr::bind_rows(fs), transform = combine(fs)),
+  di_df = target(dplyr::bind_rows(di), transform = combine(di)),
   di_long_df = target(dplyr::left_join(fs_df, di_df, by = c("sim", "year", "season", "treatment", "source", "singletons")))#,
 )
 
