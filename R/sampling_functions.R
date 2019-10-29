@@ -63,7 +63,8 @@ sample_fs_long <- function(dataset, nsamples, p_table = NULL) {
     dplyr::mutate(source = "sampled",
                   season = dataset$season[1],
                   year = dataset$year[1],
-                  treatment = dataset$treatment[1]) %>%
+                  treatment = dataset$treatment[1],
+                  singletons = dataset$singletons[1]) %>%
     dplyr::bind_rows(dataset)
 
   return(fs_samples)
