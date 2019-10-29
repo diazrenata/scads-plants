@@ -69,7 +69,7 @@ sample_plan <- drake_plan(
                                                 max_n = !!max_n_to_sample,
                                                 storeyn = FALSE)),
   fs = target(sample_fs_long(dat, nsamples, p_table),
-              transform = map(dat = !!dat_targets, nsamples = 100, p_table = master_p_table)
+              transform = map(dat = !!dat_targets, nsamples = 10000, p_table = master_p_table)
   ),
   di = target(add_dis(fs),
                 transform = map(fs)),
