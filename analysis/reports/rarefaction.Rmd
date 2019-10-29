@@ -65,13 +65,11 @@ alldat <- left_join(alldat, allests, by = c("season", "year")) %>%
 
 ```
 
-The x-axis is the actual number of species and the y-axis is the mean of 3 estimators (`chao1984`, `ChaoBunge`, `ChaoLee1992` from `SPECIES`). The black line is the 1:1 line and the blue line is the 1:1.1 line, which represents the 10% I initially added. This is often sufficient but also often conservative. 
-
-Very small communities break the estimators and have been removed. (I think S must be >3?)
+The x-axis is the actual number of species and the y-axis is the mean of the ACE and Chao estimators implemented in `vegan::estimateR`. The black line is the 1:1 line and the blue line is the 1:1.1 line, which represents the 10% I initially added. This is often sufficient but also often conservative. The red dots are the mean *maximum* estimates obtained using the estimate + the standard error.
 
 ```{r rarefaction, fig.height = 3, fig.width = 6, warning = FALSE, message = FALSE}
 
-ests_plots <- ggplot(data = alldat, aes(x = s0, y = est_s0_max)) +
+ests_plots <- ggplot(data = alldat, aes(x = s0, y = est_s0)) +
   geom_point(aes(x = s0, y = est_s0)) +
   geom_point(aes(x = s0, y = est_s0_max), color = "red")+
   geom_abline(intercept = 0, slope = 1) +
@@ -117,7 +115,6 @@ alldat <- alldat %>%
 DBI::dbDisconnect(db)
 
 ```
-
 
 ```{r load sims}
 

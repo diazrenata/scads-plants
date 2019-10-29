@@ -20,7 +20,7 @@ Imports:
     rmarkdown,
     tidyr,
     magrittr,
-    SPECIES
+    vegan
 Suggests:
     testthat
 Remotes: 

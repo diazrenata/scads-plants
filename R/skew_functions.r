@@ -25,7 +25,7 @@ add_skew <- function(fs_samples_df) {
 #' @export
 #'
 #' @importFrom e1071 skewness
-#' @importFrom dplyr group_by_at summarize ungroup
+#' @importFrom dplyr group_by_at summarize ungroup filter mutate
 #' @importFrom vegan diversity
 add_dis <- function(fs_samples_df) {
 
@@ -41,6 +41,21 @@ add_dis <- function(fs_samples_df) {
                      shannon = vegan::diversity(abund, index = "shannon", base = exp(1)),
                      simpson = vegan::diversity(abund, index = "simpson")) %>%
     dplyr::ungroup()
+
+  sim_percentiles <- sim_dis %>%
+    dplyr::filter(source == "sampled", sim > 0) %>%
+    dplyr::mutate(skew_percentile = get_percentiles(skew),
+                  shannon_percentile = get_percentiles(shannon),
+                  simpson_percentile = get_percentiles(simpson))
+
+  sampled_percentile <- sim_dis %>%
+    dplyr::filter(source == "observed", sim < 0) %>%
+    dplyr::mutate(skew_percentile = get_percentile(skew, a_vector = sim_percentiles$skew_percentile),
+                  shannon_percentile = get_percentile(shannon, a_vector = sim_percentiles$shannon_percentile),
+                  simpson_percentile = get_percentile(simpson, a_vector = sim_percentiles$simpson_percentile))
+
+
+  sim_dis <- dplyr::bind_rows(sim_percentiles, sampled_percentile)
 
   return(sim_dis)
 }

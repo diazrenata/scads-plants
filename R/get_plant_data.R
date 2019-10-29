@@ -30,7 +30,8 @@ get_plant_sad <- function(census_year = 1994, season = "summer", plot_treatment 
                   source = "observed",
                   season = season,
                   year = census_year,
-                  treatment = plot_treatment)
+                  treatment = plot_treatment,
+                  singletons = FALSE)
 
   return(portal_sad)
 

@@ -59,7 +59,8 @@ add_singletons <- function(dat, use_max =F) {
     ) %>%
     dplyr::arrange(abund) %>%
     dplyr::mutate(
-      rank = dplyr::row_number()
+      rank = dplyr::row_number(),
+      singletons = TRUE
     )
 
   return(dat)

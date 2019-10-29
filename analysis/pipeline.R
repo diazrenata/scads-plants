@@ -69,15 +69,13 @@ sample_plan <- drake_plan(
                                                 max_n = !!max_n_to_sample,
                                                 storeyn = FALSE)),
   fs = target(sample_fs_long(dat, nsamples, p_table),
-              transform = map(dat = !!dat_targets, nsamples = 10000, p_table = master_p_table)
+              transform = map(dat = !!dat_targets, nsamples = 100, p_table = master_p_table)
   ),
   di = target(add_dis(fs),
                 transform = map(fs)),
- fs_list = target(MATSS::collect_analyses(list(fs)), transform = combine(fs)),
-  fs_df = target(dplyr::bind_rows(fs_list)),
-  di_list = target(MATSS::collect_analyses(list(di)), transform = combine(di)),
-  di_df = target(dplyr::bind_rows(di_list)),
-  di_long_df = target(dplyr::left_join(fs_df, di_df, by = c("sim", "year", "season", "treatment", "source")))#,
+  fs_df = target(dplyr::bind_rows(fs), transform = combine(fs)),
+  di_df = target(dplyr::bind_rows(di), transform = combine(di)),
+  di_long_df = target(dplyr::left_join(fs_df, di_df, by = c("sim", "year", "season", "treatment", "source", "singletons")))#,
 )
 
 # reports

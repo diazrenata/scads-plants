@@ -4,7 +4,7 @@
 \alias{add_singletons}
 \title{Add singletons}
 \usage{
-add_singletons(dat)
+add_singletons(dat, use_max = F)
 }
 \arguments{
 \item{dat}{dataframe, result of get plant data}
