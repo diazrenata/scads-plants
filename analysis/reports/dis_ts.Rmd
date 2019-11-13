@@ -1,0 +1,42 @@
+---
+title: "Percentile over time"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(drake)
+library(dplyr)
+library(ggplot2)
+library(scadsplants)
+
+load(here::here("analysis", "reports", "ranked_dis.Rds"))
+
+```
+
+No singletons. (Adding singletons doesn't change it much, just adds a little clutter.)
+
+```{r over time}
+
+skew_time <- ggplot(data = filter(ranked_di_df, source == "observed", singletons == "true"), aes(x = year, y = skew_percentile, color = season)) +
+  geom_point(alpha = .8) +
+  geom_line(alpha = .4) +
+  theme_bw() +
+  scale_color_viridis_d(end = .6, direction = -1) +
+  ggtitle("Skewness percentile over time") +
+  ylim(0, 100)
+
+skew_time
+
+
+simpson_time <- ggplot(data = filter(ranked_di_df, source == "observed", singletons == "true"), aes(x = year, y = simpson_percentile, color = season)) +
+  geom_point(alpha = .8) +
+  geom_line(alpha = .4) +
+  theme_bw() +
+  scale_color_viridis_d(end = .6, direction = -1) +
+  ggtitle("Simpson percentile over time") + 
+  ylim(0, 100)
+
+simpson_time
+```
+
